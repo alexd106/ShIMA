@@ -1,0 +1,114 @@
+---
+title: "MetabolomicsPipelineTutorial"
+runtime: shiny
+output: html_document
+---
+
+
+## Autopipeline
+
+### Input
+
+<img src="AutopipelineInpt.png" alt="Aotopipeline Input" style="width: 60%"/>
+
+Input for the Autopipeline tab
+
+### Output
+
+- Peak Table:
+
+<img src="AutopipelinePeak.png" alt="Aotopipeline Output Peak" style="width: 60%"/>
+
+Peak table from the Autopipeline tab output
+
+- Report:
+
+<img src="AutopipelineReport.png" alt="Aotopipeline Output Report" style="width: 60%"/>
+
+Report table from the Autopipeline tab output
+
+- Metlin Identification:
+
+- Input for Annotation and DownStreamAnalysis Tab:
+- Identification and Annotation against various databases:
+
+
+
+
+
+
+## Preprocessing
+
+### Input
+
+<img src="AutopipelineInpt.png" alt="Preprocessing Input" style="width: 60%"/>
+
+Input for the Preprocessing tab
+
+### Output
+
+
+
+## Annotation
+
+### Input
+
+<img src="AnnotationInpt.png" alt="Annotation Input" style="width: 60%"/>
+
+Input for the Annotation tab
+
+### Output
+
+
+
+## StatisticalAnalysis
+
+
+
+### Input
+
+<img src="StatisticalAnalysisInpt.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+
+Input for the StatisticalAnalysis tab
+
+### Output
+
+#### Differential Analysis
+
+
+
+#### Network Analysis
+
+
+
+#### Visualization
+
+<img src="heatmap.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+
+Heatmap
+
+<img src="pca.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+
+PCA plot
+
+<img src="levelplot.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+
+Level plot
+
+<img src="rla.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+
+RLA plot
+
+
+
+
+
+
+
+
+
+
+  
+
+
+

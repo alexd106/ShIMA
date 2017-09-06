@@ -1,0 +1,809 @@
+library(xcms)
+library(xMSannotator)
+library(BiocParallel)
+library(splitstackshape)
+library(mixOmics)
+
+
+
+body(multilevelannotation)[[25]][[4]][[3]][[169]][[2]] <- substitute({
+  c("outloc", "adduct_weights", "boostIDs", "pathwaycheckmode", "adduct_table", 
+    "max_diff_rt", "corthresh", "filter.by", "max.rt.diff", "max_isp", "min_ions_perchem", 
+    "max.mz.diff", "db_name", "allsteps", "redundancy_check", "num_nodes", "num_sets")
+})
+# body(multilevelannotation)[[25]][[4]][[3]][[170]][[2]][[2]]<-substitute({paste0('mchemdata',',','num_nodes')})
+body(multilevelannotation)[[25]][[4]][[3]][[35]][[4]][[2]][[3]][[2]] <- substitute({
+  data(keggCompMZ)
+  names(keggCompMZ)[7] <- "AdductMass"
+})
+
+runAutopipeline <- function(inputDir, outputDir) {
+  
+  xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 
+                                                                                100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
+                  verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(10))
+  
+  xsg2 <- retcor(xsg1, method = "obiwarp", profStep = 0.01, center = 3)
+  xsg3 <- group(xsg2)
+  xsg4 <- fillPeaks(xsg3)
+  dat <- groupval(xsg4, "medret", "into")
+  dat <- rbind(group = as.character(phenoData(xsg4)$class), dat)
+  
+  report <- diffreport(xsg4, metlin = 0.15, h = 480, w = 640)
+  
+  setwd(outputDir)
+  dir.create("AutopipelineOutput")
+  outputDir<-paste0(outputDir,"/AutopipelineOutput")
+  setwd(outputDir)
+  write.table(dat, file = "MyPeakTable.txt", sep = "\t")
+  write.table(report, file = "MyExpTable.txt", sep = "\t")
+  dir.create("HMDB")
+  dir.create("KEGG")
+  dir.create("LipidMaps")
+  data <- read.table("MyExpTable.txt", sep = "\t", header = T)
+  
+  ###### 
+  dataB <- data[, -which(names(data) %in% c("fold", "tstat", "pvalue", "anova", 
+                                            "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", "metlin"))]
+  dataB <- setNames(data.frame(t(dataB[, -1])), dataB[, 1])
+  dataB$Group <- rownames(dataB)
+  dataB$Group[3:nrow(dataB)] <- paste(phenoData(xsg1)$class)
+  dataB <- dataB[, c(ncol(dataB), 1:ncol(dataB) - 1)]
+  dataB <- dataB[-c(1,2),]
+  write.csv(dataB, file = "DownstreamAnalysInpt.csv", row.names=F)
+  
+  MetlinRes <- data[, which(names(data) %in% c("name", "mzmed", "rtmed"))]
+  names(MetlinRes)[1] <- "Metlin_ID"
+  names(MetlinRes)[2] <- "mz"
+  names(MetlinRes)[3] <- "time"
+  MetlinRes$mz <- round(MetlinRes$mz, digits = 4)
+  MetlinRes$time <- round(MetlinRes$time, digits = 1)
+  write.csv(MetlinRes, file = "MetlinRes.csv", row.names=F)
+  ###### 
+  
+  dataA <- data[, -which(names(data) %in% c("name", "fold", "tstat", "pvalue", 
+                                            "anova", "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", 
+                                            "metlin"))]
+  colnames(dataA)[1] <- "mz"
+  colnames(dataA)[2] <- "time"
+  write.csv(dataA, file = "AnnotationInpt.csv", row.names=F)
+  
+  data(example_data)
+  data(adduct_table)
+  data(adduct_weights)
+  data(customIDs)
+  ## data(customDB) data(hmdbAllinf) data(keggotherinf) data(t3dbotherinf)
+  outloc1 <- paste0(outputDir, "/HMDB")
+  outloc2 <- paste0(outputDir, "/KEGG")
+  outloc3 <- paste0(outputDir, "/LipidMaps")
+  max.mz.diff <- 10
+  max.rt.diff <- 10
+  corthresh <- 0.7
+  max_isp <- 5
+  mass_defect_window <- 0.01
+  num_nodes <- 2
+  
+  db_name1 <- "HMDB"
+  db_name2 <- "KEGG"
+  db_name3 <- "LipidMaps"
+  status <- "Detected and Quantified"
+  num_sets <- 300
+  
+  mode <- "both"
+  queryadductlist <- c("M+2H", "M+H+NH4", "M+ACN+2H", "M+2ACN+2H", "M+H", "M+NH4", 
+                       "M+Na", "M+ACN+H", "M+ACN+Na", "M+2ACN+H", "2M+H", "2M+Na", "2M+ACN+H", "M+2Na-H", 
+                       "M+H-H2O", "M+H-2H2O", "M-H", "M-H2O-H", "M+Na-2H", "M+Cl", "M+FA-H")  #other options: c('M-H','M-H2O-H','M+Na-2H','M+Cl','M+FA-H'); c('positive'); c('negative'); c('all');see data(adduct_table) for complete list
+  
+  
+  customIDs <- NA
+  
+  
+  dataA <- unique(dataA)
+  print(dim(dataA))
+  
+  system.time(annotres1 <- multilevelannotation(dataA = dataA, max.mz.diff = max.mz.diff, 
+                                                max.rt.diff = max.rt.diff, cormethod = "pearson", num_nodes = num_nodes, 
+                                                queryadductlist = queryadductlist, mode = mode, outloc = outloc1, db_name = db_name1, 
+                                                adduct_weights = adduct_weights, num_sets = num_sets, allsteps = TRUE, corthresh = corthresh, 
+                                                NOPS_check = TRUE, customIDs = customIDs, missing.value = NA, deepsplit = 2, 
+                                                networktype = "unsigned", minclustsize = 10, module.merge.dissimilarity = 0.2, 
+                                                filter.by = c("M+H"), biofluid.location = NA, origin = NA, status = status, 
+                                                boostIDs = NA, max_isp = max_isp, customDB = customDB, HMDBselect = "union", 
+                                                mass_defect_window = mass_defect_window, pathwaycheckmode = "pm", mass_defect_mode = "pos"))
+  
+  system.time(annotres2 <- multilevelannotation(dataA = dataA, max.mz.diff = max.mz.diff, 
+                                                max.rt.diff = max.rt.diff, cormethod = "pearson", num_nodes = num_nodes, 
+                                                queryadductlist = queryadductlist, mode = mode, outloc = outloc2, db_name = db_name2, 
+                                                adduct_weights = adduct_weights, num_sets = num_sets, allsteps = TRUE, corthresh = corthresh, 
+                                                NOPS_check = TRUE, customIDs = customIDs, missing.value = NA, deepsplit = 2, 
+                                                networktype = "unsigned", minclustsize = 10, module.merge.dissimilarity = 0.2, 
+                                                filter.by = c("M+H"), biofluid.location = NA, origin = NA, status = status, 
+                                                boostIDs = NA, max_isp = max_isp, customDB = customDB, HMDBselect = "union", 
+                                                mass_defect_window = mass_defect_window, pathwaycheckmode = "pm", mass_defect_mode = "pos"))
+  
+  system.time(annotres3 <- multilevelannotation(dataA = dataA, max.mz.diff = max.mz.diff, 
+                                                max.rt.diff = max.rt.diff, cormethod = "pearson", num_nodes = num_nodes, 
+                                                queryadductlist = queryadductlist, mode = mode, outloc = outloc3, db_name = db_name3, 
+                                                adduct_weights = adduct_weights, num_sets = num_sets, allsteps = TRUE, corthresh = corthresh, 
+                                                NOPS_check = TRUE, customIDs = customIDs, missing.value = NA, deepsplit = 2, 
+                                                networktype = "unsigned", minclustsize = 10, module.merge.dissimilarity = 0.2, 
+                                                filter.by = c("M+H"), biofluid.location = NA, origin = NA, status = status, 
+                                                boostIDs = NA, max_isp = max_isp, customDB = customDB, HMDBselect = "union", 
+                                                mass_defect_window = mass_defect_window, pathwaycheckmode = "pm", mass_defect_mode = "pos"))
+  
+  ###### 
+  hmdbRes <- read.csv(paste0(outputDir, "/HMDB/Stage5.csv"), header = T)
+  hmdbRes$mz <- round(hmdbRes$mz, digits = 4)
+  hmdbRes$time <- round(hmdbRes$time, digits = 1)
+  hmdbRes$db_name <- "HMDB"
+  keggRes <- read.csv(paste0(outputDir, "/KEGG/Stage5.csv"), header = T)
+  keggRes$mz <- round(keggRes$mz, digits = 4)
+  keggRes$time <- round(keggRes$time, digits = 1)
+  keggRes$db_name <- "KEGG"
+  LipidMapsRes <- read.csv(paste0(outputDir, "/LipidMaps/Stage5.csv"), header = T)
+  LipidMapsRes$mz <- round(LipidMapsRes$mz, digits = 4)
+  LipidMapsRes$time <- round(LipidMapsRes$time, digits = 1)
+  LipidMapsRes$db_name <- "LipidMaps"
+  
+  hmdb_kegg_LipidMaps <- rbind(hmdbRes, keggRes, LipidMapsRes)
+  hmdb_kegg_LipidMaps2 <- cSplit(hmdb_kegg_LipidMaps, "Name", sep = ";", direction = "long")
+  setDF(hmdb_kegg_LipidMaps2)
+  
+  hmdb_kegg_LipidMaps3 <- aggregate(cbind(chemical_ID = as.character(chemical_ID), 
+                                          Confidence, score, Module_RTclust, MatchCategory = as.character(MatchCategory), 
+                                          theoretical.mz, delta_ppm, Formula = as.character(Formula), MonoisotopicMass, 
+                                          Adduct = as.character(Adduct), ISgroup = as.character(ISgroup), mean_int_vec, 
+                                          MD, db_name = as.character(db_name)) ~ mz + time + Name, hmdb_kegg_LipidMaps2, 
+                                    paste, collapse = "|")
+  
+  setwd(outputDir)
+  write.csv(hmdb_kegg_LipidMaps3, file = "hmdb_kegg_LipidMaps3.csv", row.names=F)
+  
+  MetlinRes_hmdb_kegg_LipidMaps3 <- merge(MetlinRes, hmdb_kegg_LipidMaps3, by = c("mz", 
+                                                                                  "time"), all = T)
+  write.csv(MetlinRes_hmdb_kegg_LipidMaps3, file = "AllMergdRes.csv", row.names=F)
+  ###### 
+  
+  
+}
+
+
+runXCMS <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrate,mzdiff,nSlaves,retcorMethod,profStep,center) {
+  
+  xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = as.numeric(ppm), peakwidth = peakwidth, snthresh = as.numeric(snthresh), prefilter = prefilter, integrate = as.numeric(integrate), mzdiff = as.numeric(mzdiff), 
+                  verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(as.numeric(nSlaves)))
+  
+  #xsg2 <- retcor(xsg1, method = "obiwarp", profStep = 0.01, center = 3)
+  xsg2 <- retcor(xsg1, method = retcorMethod, profStep = as.numeric(profStep), center = as.numeric(center))
+  xsg3 <- group(xsg2)
+  xsg4 <- fillPeaks(xsg3)
+  dat <- groupval(xsg4, "medret", "into")
+  dat <- rbind(group = as.character(phenoData(xsg4)$class), dat)
+  report <- diffreport(xsg4, metlin = 0.15, h = 480, w = 640)
+  setwd(outputDir)
+  dir.create("PreprocessingOutput")
+  outputDir<-paste0(outputDir,"/PreprocessingOutput")
+  setwd(outputDir)
+  write.table(dat, file = "MyPeakTable.txt", sep = "\t")
+  write.table(report, file = "MyExpTable.txt", sep = "\t")
+  
+  
+  ######
+  data <- read.table("MyExpTable.txt", sep = "\t", header = T)
+  dataB <- data[, -which(names(data) %in% c("fold", "tstat", "pvalue", "anova", 
+                                            "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", "metlin"))]
+  dataB <- setNames(data.frame(t(dataB[, -1])), dataB[, 1])
+  dataB$Group <- rownames(dataB)
+  dataB$Group[3:nrow(dataB)] <- paste(phenoData(xsg1)$class)
+  dataB <- dataB[, c(ncol(dataB), 1:ncol(dataB) - 1)]
+  dataB <- dataB[-c(1,2),]
+  write.csv(dataB, file = "DownstreamAnalysInpt.csv", row.names=F)
+  
+  MetlinRes <- data[, which(names(data) %in% c("name", "mzmed", "rtmed"))]
+  names(MetlinRes)[1] <- "Metlin_ID"
+  names(MetlinRes)[2] <- "mz"
+  names(MetlinRes)[3] <- "time"
+  MetlinRes$mz <- round(MetlinRes$mz, digits = 4)
+  MetlinRes$time <- round(MetlinRes$time, digits = 1)
+  write.csv(MetlinRes, file = "MetlinRes.csv", row.names=F)
+  ###### 
+  
+  dataA <- data[, -which(names(data) %in% c("name", "fold", "tstat", "pvalue", 
+                                            "anova", "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", 
+                                            "metlin"))]
+  colnames(dataA)[1] <- "mz"
+  colnames(dataA)[2] <- "time"
+  write.csv(dataA, file = "AnnotationInpt.csv", row.names=F)
+}
+
+
+
+runAnnotation <- function(dataA, outDir, max.mz.diff, max.rt.diff, num_nodes, queryadductlist, 
+                          mode, db_name, num_sets, corthresh, status, max_isp, mass_defect_window) {
+  
+  
+  data(example_data)
+  data(adduct_table)
+  data(adduct_weights)
+  data(customIDs)
+  data(customDB)
+  customIDs <- NA
+  dataA <- unique(dataA)
+  print(dim(dataA))
+  print(format(Sys.time(), "%a %b %d %X %Y"))
+  
+  setwd(outDir)
+  dir.create("AnnotationOutput")
+  outputDir<-paste0(outDir,"/AnnotationOutput")
+  setwd(outputDir)
+  
+  if (db_name == "HMDB") {
+    dir.create("HMDB")
+    outloc <- paste0(outputDir, "/HMDB")
+  } else if (db_name == "KEGG") {
+    dir.create("KEGG")
+    outloc <- paste0(outputDir, "/KEGG")
+  } else if (db_name == "LipidMaps") {
+    dir.create("LipidMaps")
+    outloc <- paste0(outputDir, "/LipidMaps")
+  }
+  
+  
+  
+  system.time(annotres <- multilevelannotation(dataA = dataA, max.mz.diff = as.numeric(max.mz.diff), 
+                                               max.rt.diff = as.numeric(max.rt.diff), cormethod = "pearson", num_nodes = as.numeric(num_nodes), 
+                                               queryadductlist = queryadductlist, mode = mode, outloc = outloc, db_name = db_name, 
+                                               adduct_weights = adduct_weights, num_sets = as.numeric(num_sets), allsteps = TRUE, 
+                                               corthresh = as.numeric(corthresh), NOPS_check = TRUE, customIDs = customIDs, 
+                                               missing.value = NA, deepsplit = 2, networktype = "unsigned", minclustsize = 10, 
+                                               module.merge.dissimilarity = 0.2, filter.by = c("M+H"), biofluid.location = NA, 
+                                               origin = NA, status = status, boostIDs = NA, max_isp = as.numeric(max_isp), 
+                                               customDB = customDB, HMDBselect = "union", mass_defect_window = as.numeric(mass_defect_window), 
+                                               pathwaycheckmode = "pm", mass_defect_mode = "pos"))
+  
+  
+}
+
+runDiffAnalysis <- function(met, grp4comp, file2name) {
+  
+  if (!require(metabolomics)) {
+    install.packages("metabolomics", dep = TRUE, quiet = TRUE)
+    library(metabolomics, quietly = TRUE)
+  }
+  
+  if (!require(lattice)) {
+    install.packages("lattice", dep = TRUE, quiet = TRUE)
+    library(lattice, quietly = TRUE)
+  }
+  
+  if (!require(Heatplus)) {
+    install.packages("Heatplus", dep = TRUE, quiet = TRUE)
+    library(Heatplus, quietly = TRUE)
+  }
+  
+  if (!require(mixOmics)) {
+    install.packages("mixOmics", dep = TRUE, quiet = TRUE)
+    library(mixOmics, quietly = TRUE)
+  }
+  
+  
+  ################## normalise#######################
+  
+  # Normalize and rescale data to mean=0 and sd=1 Call data frame, norm
+  normalizeSample <- function(x) {
+    xNorm <- x
+    for (i in 1:ncol(x)) {
+      temp <- x[, i]
+      temp2 <- (temp - mean(temp, na.rm = TRUE))/sd(temp, na.rm = TRUE)
+      xNorm[, i] <- temp2
+    }
+    return(xNorm)
+  }
+  
+  normalizeFeature <- function(x) {
+    xNorm <- x
+    for (i in 1:nrow(x)) {
+      temp <- x[i, ]
+      temp2 <- (temp - mean(temp, na.rm = TRUE))/sd(temp, na.rm = TRUE)
+      xNorm[i, ] <- temp2
+    }
+    return(xNorm)
+  }
+  
+  
+  ################################################ 
+  
+  met[met == 0] <- 0.0001
+  
+  met.1 <- as.matrix(met[2:ncol(met)])
+  #rownames(met.1) <- rownames(met)
+  met.1 <- log2(met.1)
+  
+  norm.feat <- normalizeFeature(met.1)
+  
+  norm.samp <- normalizeSample(norm.feat)
+  
+  norm.samp <- data.frame(norm.samp)
+  
+  Group <- met$Group
+  
+  met.2 <- cbind(Group, norm.samp)
+  
+  write.csv(met.2, paste0("norm_", file2name, ".csv"), row.names = F)
+  
+  met.log <- met.2
+  
+  met.3 <- as.matrix(met.log[, -1])
+  #met.log$Group <- relevel(met.log$Group, ref)
+  trans.met.log <- t(met.log[, -1])
+  colnames(trans.met.log) <- met.log[, 1]
+  cormat <- cor(trans.met.log, use = "complete.obs")
+  # create design matrix
+  design <- with(met.log, model.matrix(~0 + Group))
+  
+  # attr(design, 'dimnames')[[2]] <- c('BTAL12', 'BTAL24', 'BTCR10', 'BTCR20',
+  # 'BTCR30', 'BTCR40')
+  attr(design, "dimnames")[[2]] <- gsub("Group", "", attr(design, "dimnames")[[2]])
+  
+  if(any(grep("/",grp4comp)) == TRUE){
+    contrast.mat <- makeContrasts(contrasts = gsub("/","-",grp4comp), levels = design)
+  } else{
+    ref <- grp4comp
+    grpNames <- attr(design, "dimnames")[[2]]
+    grpNamesWithoutRef <- grpNames[-which(ref %in% grpNames)]
+    # contrast.mat <- makeContrasts( 'BTAL24-BTAL12', 'BTCR10-BTAL12',
+    # 'BTCR20-BTAL12', 'BTCR30-BTAL12', 'BTCR40-BTAL12', levels=design)
+    makeContrastsVar <- c()
+    for (i in 1:length(grpNamesWithoutRef)) {
+      makeContrastsVar <- c(makeContrastsVar, paste0(grpNamesWithoutRef[i], "-", 
+                                                     ref))
+    }
+    contrast.mat <- makeContrasts(contrasts = makeContrastsVar, levels = design)
+  }
+  
+  
+  
+  #################### make a linear model #########################################
+  
+  
+  mod1 <- LinearModelFit(datamat = met.log[, -1], contrastmat = contrast.mat, factormat = design, 
+                         ruv2 = FALSE, k = NULL, nc = NULL, moderated = TRUE, padjmethod = "BH", saveoutput = FALSE, 
+                         outputname = "results")
+  
+  
+  # produce a table of significant results based on F statistic
+  
+  results_F <- topTable(mod1, number = Inf, adjust = "BH")
+  
+  write.csv(results_F, "Top Table of SDE Metabolites.csv")
+  
+  # sum(results_F$adj.P.Val < 0.2)
+  
+  # sum(results_F$P.Val < 0.05)
+  
+  results <- decideTests(mod1, adjust.method = "BH", p.value = 0.2)
+  
+  #### UNADJUSTED P VALUE
+  
+  results_0.05 <- decideTests(mod1, adjust.method = "none", p.value = 0.05)
+  
+  mod1$genes <- data.frame(metabolites = rownames(mod1))
+  
+  # write a file containing all the test statistic, pvalues etc for each contrast
+  
+  write.fit(mod1, file = "BAT.SDE.mets.csv", adjust = "BH", F.adjust = "BH", method = "separate", 
+            sep = ",")
+  
+  
+}
+
+runCMI <- function(GrpMetMZ, irlba = FALSE, graphML, stats, prefix = "CMI_stats") {
+  
+  
+  # check if required packages are installed. If not install.
+  if (!require(minet)) {
+    install.packages("minet", dep = TRUE, quiet = TRUE)
+    library(minet, quietly = TRUE)
+  }
+  
+  if (!require(igraph)) {
+    install.packages("igraph", dep = TRUE, quiet = TRUE)
+    library(igraph, quietly = TRUE)
+  }
+  
+  if (!require(data.table)) {
+    install.packages("data.table", dep = TRUE, quiet = TRUE)
+    library(data.table, quietly = TRUE)
+  }
+  
+  if (irlba == TRUE) {
+    if (!require(irlba)) {
+      install.packages("irlba", dep = TRUE, quiet = TRUE)
+      library(irlba, quietly = TRUE)
+    }
+  }
+  
+  if (!require(qdap)) {
+    install.packages("qdap", dep = TRUE, quiet = TRUE)
+    library(qdap, quietly = TRUE)
+  }
+  
+  if (!require(Matrix)) {
+    install.packages("Matrix", dep = TRUE, quiet = TRUE)
+    library(Matrix, quietly = TRUE)
+  }
+  
+  
+   
+  
+  GrpMetMZ[GrpMetMZ == 0] <- 0.0001
+  GrpMetMZ[GrpMetMZ == Inf] <- 0.0001
+  
+                           
+  metMZ.mi <- minet(GrpMetMZ[, 2:length(GrpMetMZ)], method = "aracne", estimator = "mi.mm", 
+                    disc = "equalwidth")
+  write.csv(metMZ.mi, file = "metMZmi.csv")
+  AI <- metMZ.mi
+  rownames(AI) <- colnames(AI)
+  feature.names <- rownames(AI)
+  num.nodes <- dim(AI)[1]
+  gc()
+  
+  n <- dim(AI)[1]
+  
+  cat("Converting to igraph object", "\n")
+  AI.graph <- graph_from_adjacency_matrix(AI, mode = "undirected", weighted = TRUE, 
+                                          diag = FALSE, add.colnames = "label")
+  
+  cat("Optimising modularity ", "\n")
+  AI.clust <- cluster_leading_eigen(AI.graph)
+  clust.mem <- membership(AI.clust)
+  Q <- AI.clust$modularity
+  
+  cat("Computing network statistics ", "\n")
+  assocm <- AI - diag(diag(AI))  #diagonal==0
+  strength <- round(rowSums(assocm), digits = 3)
+  node.degree <- apply(assocm, 1, function(x) length(x[x > 0]))
+  
+  if (irlba == TRUE) {
+    eigencent <- round(abs(irlba(assocm, nu = 0, nv = 1)$v[, 1]), digits = 3)  # use with irlba for very large networks
+  } else {
+    eigencent <- round(abs(eigen(assocm, symmetric = TRUE)$vectors[, 1]), digits = 3)
+  }
+  
+  netStats <- list(ID = feature.names, cluster = clust.mem, NodeStrength = strength, 
+                   EigenCentrality = eigencent, NodeDegree = node.degree)
+  net.stats.name <- paste(prefix, "_", "metMZmi", "_NetStats.txt", sep = "")
+  
+  if (is.null(graphML) && is.null(stats)) {
+    print("No output file selected...")
+  } else if (graphML=="graphML" & stats=="stats"){
+    net.graph.name <- paste(prefix, "_", "metMZmi", "_net.graphML", sep = "")
+    cat("Creating graphML file", net.graph.name, "\n")
+    D <- dim(AI)[1]
+    sink(net.graph.name)
+    cat("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\nhttp://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">\n")
+    cat("<key id=\"d0\" for=\"node\" attr.name=\"cluster\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d1\" for=\"node\" attr.name=\"NodeStrength\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d2\" for=\"node\" attr.name=\"eigen\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d3\" for=\"node\" attr.name=\"NodeDegree\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d4\" for=\"edge\" attr.name=\"Weight\" attr.type=\"double\"/>\n")
+    cat("<graph id=\"G\" edgedefault=\"undirected\">\n")
+    
+    for (i in 1:D) {
+      cat(paste("\t<node id=\"", dimnames(AI)[[1]][i], "\">\n"))
+      cat(paste("\t<data key=\"d0\">", clust.mem[i], "</data>\n"))
+      cat(paste("\t<data key=\"d1\">", strength[i], "</data>\n"))
+      cat(paste("\t<data key=\"d2\">", eigencent[i], "</data>\n"))
+      cat(paste("\t<data key=\"d3\">", node.degree[i], "</data>\n"))
+      cat(paste("\t</node>\n"))
+    }
+    
+    n <- 1
+    for (i in 1:length(dimnames(AI)[[1]])) {
+      for (j in 1:length(dimnames(AI)[[2]])) {
+        if(AI[i,j]!=0){
+          cat(paste("\t<edge id=\"", n,"\" Source=\"", dimnames(AI)[[1]][i], "\" Target=\"", dimnames(AI)[[2]][j], "\">\n")) 
+          cat(paste("\t<data key=\"d4\">", AI[i,j], "</data>\n"))	
+          cat(paste("\t</edge>\n"))
+          n <- n+1
+        }
+      }
+    }
+    
+    cat("</graph>\n")
+    cat("</graphml>")
+    sink()
+    
+    cat("Exporting network statistics to file: ", net.stats.name, "\n")
+    fwrite(netStats, file = net.stats.name, col.names = TRUE, sep = " ")
+    net.info.name <- paste(prefix, "_", "metMZmi", "_NetInfo.txt", sep = "")
+    cat("Exporting network info to file", net.info.name, "\n")
+    sink(net.info.name)
+    cat(paste("The number of nodes: ", num.nodes, "\n"))
+    #cat(paste("The number of edges: ", num.int, "\n"))
+    cat(paste("Modularity Coefficient: ", Q, "\n"))
+    sink()
+  } else if (graphML=="graphML"){
+    net.graph.name <- paste(prefix, "_", "metMZmi", "_net.graphML", sep = "")
+    cat("Creating graphML file", net.graph.name, "\n")
+    D <- dim(AI)[1]
+    sink(net.graph.name)
+    cat("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\nxmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\nxsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\nhttp://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">\n")
+    cat("<key id=\"d0\" for=\"node\" attr.name=\"cluster\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d1\" for=\"node\" attr.name=\"NodeStrength\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d2\" for=\"node\" attr.name=\"eigen\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d3\" for=\"node\" attr.name=\"NodeDegree\" attr.type=\"double\"/>\n")
+    cat("<key id=\"d4\" for=\"edge\" attr.name=\"Weight\" attr.type=\"double\"/>\n")
+    cat("<graph id=\"G\" edgedefault=\"undirected\">\n")
+    
+    for (i in 1:D) {
+      cat(paste("\t<node id=\"", dimnames(AI)[[1]][i], "\">\n"))
+      cat(paste("\t<data key=\"d0\">", clust.mem[i], "</data>\n"))
+      cat(paste("\t<data key=\"d1\">", strength[i], "</data>\n"))
+      cat(paste("\t<data key=\"d2\">", eigencent[i], "</data>\n"))
+      cat(paste("\t<data key=\"d3\">", node.degree[i], "</data>\n"))
+      cat(paste("\t</node>\n"))
+    }
+    
+    
+    
+    n <- 1
+    for (i in 1:length(dimnames(AI)[[1]])) {
+      for (j in 1:length(dimnames(AI)[[2]])) {
+        if(AI[i,j]!=0){
+          cat(paste("\t<edge id=\"", n,"\" Source=\"", dimnames(AI)[[1]][i], "\" Target=\"", dimnames(AI)[[2]][j], "\">\n")) 
+          cat(paste("\t<data key=\"d4\">", AI[i,j], "</data>\n"))	
+          cat(paste("\t</edge>\n"))
+          n <- n+1
+        }
+      }
+    }
+    
+    
+    
+    cat("</graph>\n")
+    cat("</graphml>")
+    sink()
+  } else if (stats == "stats") {
+    cat("Exporting network statistics to file: ", net.stats.name, "\n")
+    fwrite(netStats, file = net.stats.name, col.names = TRUE, sep = " ")
+    net.info.name <- paste(prefix, "_", "metMZmi", "_NetInfo.txt", sep = "")
+    cat("Exporting network info to file", net.info.name, "\n")
+    sink(net.info.name)
+    cat(paste("The number of nodes: ", num.nodes, "\n"))
+    #cat(paste("The number of edges: ", num.int, "\n"))
+    cat(paste("Modularity Coefficient: ", Q, "\n"))
+    sink()
+  }
+  
+  
+  
+  
+  
+  
+ 
+  # write to graphML file
+  
+  rm(list=ls())
+  gc()
+}
+
+
+runViz <- function(met.log, plots = F, file4name) {
+  
+  if (!require(metabolomics)) {
+    install.packages("metabolomics", dep = TRUE, quiet = TRUE)
+    library(metabolomics, quietly = TRUE)
+  }
+  
+  if (!require(lattice)) {
+    install.packages("lattice", dep = TRUE, quiet = TRUE)
+    library(lattice, quietly = TRUE)
+  }
+  
+  if (!require(Heatplus)) {
+    install.packages("Heatplus", dep = TRUE, quiet = TRUE)
+    library(Heatplus, quietly = TRUE)
+  }
+  
+  if (!require(mixOmics)) {
+    install.packages("mixOmics", dep = TRUE, quiet = TRUE)
+    library(mixOmics, quietly = TRUE)
+  }
+  
+  #met.log <- read.table("norm_BS.fil.imp.bat.csv", header=T, sep=",", row.names = 1)
+  Group <- met.log$Group
+  #met.log <- met.log[,-1]
+  met.3 <- as.matrix(met.log[, -1])
+  #met.log$Group <- relevel(met.log$Group, ref)
+  trans.met.log <- t(met.log[, -1])
+  colnames(trans.met.log) <- met.log[, 1]
+  cormat <- cor(trans.met.log, use = "complete.obs")
+  # create design matrix
+  design <- with(met.log, model.matrix(~0 + Group))
+  
+  # attr(design, 'dimnames')[[2]] <- c('BTAL12', 'BTAL24', 'BTCR10', 'BTCR20',
+  # 'BTCR30', 'BTCR40')
+  attr(design, "dimnames")[[2]] <- gsub("Group", "", attr(design, "dimnames")[[2]])
+ 
+  meta<-as.matrix(met.log[,-1])
+  
+  # replace all non-finite values with 0
+  meta[!is.finite(meta)] <- 0
+  
+  plsda.dol<-plsda(meta, Group, ncomp = 2, logratio = "none")
+  
+  if (is.null(plots)) {
+    print("No plot selected...")
+  } else if (plots == "heatmap pca lvl rla") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "heatmap pca lvl") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+  } else if (plots == "heatmap pca rla") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "heatmap lvl rla") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "pca lvl rla") {
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "heatmap pca") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+  } else if (plots == "heatmap lvl") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+  } else if (plots == "heatmap rla") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "pca lvl") {
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+  } else if (plots == "pca rla") {
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "lvl rla") {
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "heatmap") {
+    png("heatmap.png")
+    heatmap(met.3)
+    dev.off()
+  } else if (plots == "pca") {
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+  } else if (plots == "lvl") {
+    # plot to look at corellations between samples
+    png("level.png")
+    levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))
+    dev.off()
+  } else if (plots == "rla") {
+    # Produce within group and across group relative log abundance plots to visualise
+    # a metabolomics data matrix.
+    png("RLA_acrossGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, 
+                                                                             -5))  #across groups
+    dev.off()
+    png("RLA_withinGrp.png")
+    RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, 
+                                                                             -5))  #within groups
+    dev.off()
+  } else if (plots == "pca") {
+    # PCA plot of the metabolites and groups
+    png("pca.png")
+    plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+    dev.off()
+  }
+  # else if(plots=='pca'){ png('PCA.png') PCA plot of the metabolites and groups
+  # PcaPlots(met.log,varplot=F,multiplot=F) Plot PCA with different PCs
+  # PcaPlots(met.log,varplot=F,multiplot=F, y.axis = 3, x.axis = 5 ) dev.off() }
+  
+  
+  # for (i in 1:3) { png(file=paste0(i,'.png'))
+  # PcaPlots(met.log,varplot=T,multiplot=T, n=2) dev.off() }
+  
+  
+}
+
