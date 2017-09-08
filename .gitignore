@@ -1,1 +1,7 @@
-*~
+
+#ignore temp files 
+Examples/AutopipelineInpt/QC/*~
+Examples/AutopipelineInpt/blank/*~
+Examples/AutopipelineInpt/sample1/*~
+Examples/AutopipelineInpt/sample2/*~
+Examples/AutopipelineInpt/sample3/*~
