@@ -1,7 +1,7 @@
 
 #ignore temp files 
-Examples$ cd AutopipelineInpt/QC/*~
-Examples$ cd AutopipelineInpt/blank/*~
-Examples$ cd AutopipelineInpt/sample1/*~
-Examples$ cd AutopipelineInpt/sample2/*~
-Examples$ cd AutopipelineInpt/sample3/*~
+Examples/AutopipelineInpt/QC/*~
+Examples/AutopipelineInpt/blank/*~
+Examples/AutopipelineInpt/sample1/*~
+Examples/AutopipelineInpt/sample2/*~
+Examples/AutopipelineInpt/sample3/*~
