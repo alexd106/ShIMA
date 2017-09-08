@@ -27,9 +27,17 @@
                
                ),
       
-      tabPanel("Pipeline",           
-    
-      fluidPage(
+      tabPanel("Pipeline",
+        fluidPage(
+               tags$style(".nav-tabs {background-color: white;}
+               .nav-tabs-custom .nav-tabs li.active:hover a, .nav-tabs-custom .nav-tabs li.active a {
+               background-color: transparent;
+               border-color: transparent;
+               }
+               .nav-tabs-custom .nav-tabs li.active {
+               border-top-color: #CCC;
+               }"),
+      
         tabsetPanel(id = "inTabset",
           tabPanel(title = tags$b("Autopipeline"), value = "panel1", 
             fixedRow(
@@ -356,7 +364,8 @@
                           column(4, tags$b("Adducts"),
                             column(12,
                               selectInput("var3", "", selected = "M+H", multiple = TRUE, selectize=FALSE,
-                                c("M+H" = "M+H",
+                                c(
+                                  "M+H" = "M+H",
                                   "M+2H" = "M+2H",
                                   "M+H+NH4" = "M+H+NH4",
                                   "M+ACN+2H" = "M+ACN+2H",
@@ -377,7 +386,7 @@
                                   "M+Na-2H" = "M+Na-2H",
                                   "M+Cl" = "M+Cl",
                                   "M+FA-H" = "M+FA-H"
-                                  )
+                                )
                                   )
                                )
                            )
@@ -455,50 +464,77 @@
                 
                 )
               
-              ),
+              )
             
-            bsCollapsePanel("Visualization", style = "info",
-                            fixedRow(
-                              column(12, style="background-color: lightgrey;",
-                                     column(6, h4(tags$u("Upload data")), style="background-color: lightgrey;", 
-                                            fileInput('file4', '', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-                                            checkboxInput('header', 'Header', TRUE),
-                                            radioButtons('sep3', 'Separator', c(Comma=',',  Tab='\t'), ','),
-                                            shinyDirButton('directory4_3', 'Output directory', 'Please select a folder'),
-                                            verbatimTextOutput('directorypath4_3')
-                                            
-                                            
-                                     ),
-                                     column(6, style="background-color: lightgrey;",h4(tags$u("Chose plots")),
-                                           checkboxGroupInput("var7", "",
-                                                               c("Heatmap" = "heatmap",
-                                                                 "PCA" = "pca",
-                                                                 "Level" = "lvl",
-                                                                 "RLA" = "rla"))
-                                            
-                                            
-                                     )
-                              ),
-                              column(12, style="background-color: lightgrey;",
-                                     actionButton("go6", "GO", style="float:right"),
-                                     tags$br() 
-                                     
-                                     
-                              )
-                            )
-            )
+            
+            
            )
-         )
+         ),
+       
+       tabPanel(title = tags$b("Visualization"), value = "panel5", 
+         bsCollapse(id = "collapse4",
+           bsCollapsePanel("Visualization", style = "info",
+             fluidPage(
+               tabsetPanel(id = "inTabset1",           
+                 tabPanel(title = tags$b("Heatmap"), value = "panel4.1", 
+                   fixedRow(
+                     column(12, style="background-color: lightgrey;",
+                       column(6, h4(tags$u("Upload data")), style="background-color: lightgrey;", 
+                                 fileInput('file4_1', '', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+                                 checkboxInput('header', 'Header', TRUE),
+                                 radioButtons('sep3_1', 'Separator', c(Comma=',',  Tab='\t'), ','),
+                                 shinyDirButton('directory4_3_1', 'Output directory', 'Please select a folder'),
+                                 verbatimTextOutput('directorypath4_3_1')
+                             ),
+                        column(6, style="background-color: white;", 
+                                  plotOutput("plotHeatmap")    
+                               )
+                            ),
+                     column(12, style="background-color: lightgrey;",
+                                actionButton("go6_1", "GO", style="float:right"),
+                                tags$br() 
+                           )
+                   )
+                           ),
+                   
+                   
+                   
+                   
+                     column(12, tags$hr(),
+                            
+                            d3heatmapOutput("plotHeatmapInteract")    
+                     
+                   
+                        ),
+                 tabPanel(title = tags$b("PCA Plot"), value = "panel4.2" 
+                          
+                         ),
+                 tabPanel(title = tags$b("RLA Plot"), value = "panel4.3"
+                                                                  
+                         ),
+                 tabPanel(title = tags$b("Level Plot"), value = "panel4.4"
+                                                                  
+                         )
+                                                         
+                   )
+               )  
+            )      
+            )
        )
-      
-      
-    ),
-    
-    fixedRow(
-      column(12, style="background-color: lightgrey;",
-             fluidPage(DT::dataTableOutput('tbl'))         
-      )
+       )
+       
     )
+    
+    #fixedRow(
+    #  column(12, style="background-color: lightgrey;",
+    #         fluidPage(DT::dataTableOutput('tbl'))         
+    #  ),
+    # ) 
+      
+    
+    
+    
+    
     
       ),
     
@@ -549,8 +585,8 @@
     output$directorypath4_1 <- renderText({if(is.null(input$directory4_1)){"None Selected"}else{parseDirPath(volumes, input$directory4_1)}})
     shinyDirChoose(input, 'directory4_2', roots=volumes, session=session, restrictions=system.file(package='base'))
     output$directorypath4_2 <- renderText({if(is.null(input$directory4_2)){"None Selected"}else{parseDirPath(volumes, input$directory4_2)}})
-    shinyDirChoose(input, 'directory4_3', roots=volumes, session=session, restrictions=system.file(package='base'))
-    output$directorypath4_3 <- renderText({if(is.null(input$directory4_3)){"None Selected"}else{parseDirPath(volumes, input$directory4_3)}})
+    shinyDirChoose(input, 'directory4_3_1', roots=volumes, session=session, restrictions=system.file(package='base'))
+    output$directorypath4_3_1 <- renderText({if(is.null(input$directory4_3_1)){"None Selected"}else{parseDirPath(volumes, input$directory4_3_1)}})
     
     source("pipeline.R")
     
@@ -755,59 +791,32 @@
         
         
         #source("runViz.R")
-        observeEvent(input$go6, {
+        observeEvent(input$go6_1, {
           
           
-          inFile4 <- input$file4
-          if (is.null(inFile4))
+          inFile4_1 <- input$file4_1
+          if (is.null(inFile4_1))
             return(NULL)
-          met.log<-read.table(inFile4$datapath, header=input$header, sep=input$sep3)
-          file4name <- print(gsub(".txt|.csv", "",inFile4$name))
+          met.log<-read.table(inFile4_1$datapath, header=input$header, sep=input$sep3_1, row.names = 1)
+          file4_1name <- print(gsub(".txt|.csv", "",inFile4_1$name))
           
-          heatmap <- "heatmap" %in% input$var7
-          lvl <- "lvl"  %in% input$var7
-          rla <- "rla"  %in% input$var7
-          pca <- "pca"  %in% input$var7
-          if (is.null(input$var7) ){
-            plots <- "NULL"
-          } else if (heatmap & pca & lvl & rla){
-            plots <- "heatmap pca lvl rla"
-          } else if (heatmap & pca & lvl){
-            plots <- "heatmap pca lvl"
-          } else if (heatmap & pca & rla){
-            plots <- "heatmap pca rla"
-          } else if (heatmap & lvl & rla){
-            plots <- "heatmap lvl rla"
-          } else if (pca & lvl & rla){
-            plots <- "pca lvl rla"
-          } else if (heatmap & pca){
-            plots <- "heatmap pca"
-          } else if (heatmap & lvl){
-            plots <- "heatmap lvl"
-          } else if (heatmap & rla){
-            plots <- "heatmap rla"
-          } else if (pca & lvl){
-            plots <- "pca lvl"
-          } else if (pca & rla){
-            plots <- "pca rla"
-          } else if (lvl & rla){
-            plots <- "lvl rla"
-          } else if (heatmap){
-            plots <- "heatmap"
-          } else if (pca){
-            plots <- "pca"
-          } else if (lvl){
-            plots <- "lvl"
-          } else if (rla){
-            plots <- "rla"
-          } 
+          met.3 <- as.matrix(met.log)
+          output$plotHeatmap <- renderPlot({heatmap(met.3)})
+          outputDir<-print({parseDirPath(volumes, input$directory4_3_1)})
           
-          outputDir<-print({parseDirPath(volumes, input$directory4_3)})
+          output$plotHeatmapInteract <- renderD3heatmap({
+            d3heatmap(met.log, scale = "column")
+            })
+          
           #cwd<-getwd()
           setwd(outputDir)
           dir.create("runVizRes")
           setwd("runVizRes")
-          runViz(met.log, plots, file4name)
+          png("heatmap.png")
+          heatmap(met.3)
+          dev.off()
+          #plots <- "heatmap"
+          #runViz(met.log, plots, file4name)
           setwd(outputDir)
           #setwd(cwd)
           print("Job Done...")

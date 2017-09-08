@@ -75,11 +75,15 @@ shiny::runGitHub("MIAP", "AccountName")
 
 
 We would appreciate reports of any issues with the app via the issues option of 
-[Github](https://github.com/AccountName/MIAP) or by emailing ---------------.
+[Github](https://github.com/alexd106/ShIMA) or by emailing ---------------.
 
-# Instructions
+# Documentation
 
-Instructions can be found here: <https://github.com/AccountName/MIAP/Documentation/Instructions.md> 
+The description about the pipeline can be found here: <https://github.com/alexd106/ShIMA/Documentation.Rmd> 
+
+# Tutorials
+
+Users can go through the tutorial with an example dataset here: <https://github.com/alexd106/ShIMA/Tutorial.Rmd> 
 
 # Licensing
 

@@ -4,6 +4,30 @@ library(BiocParallel)
 library(splitstackshape)
 library(mixOmics)
 
+if (!require(metabolomics)) {
+  install.packages("metabolomics", dep = TRUE, quiet = TRUE)
+  library(metabolomics, quietly = TRUE)
+}
+
+if (!require(lattice)) {
+  install.packages("lattice", dep = TRUE, quiet = TRUE)
+  library(lattice, quietly = TRUE)
+}
+
+if (!require(Heatplus)) {
+  install.packages("Heatplus", dep = TRUE, quiet = TRUE)
+  library(Heatplus, quietly = TRUE)
+}
+
+if (!require(mixOmics)) {
+  install.packages("mixOmics", dep = TRUE, quiet = TRUE)
+  library(mixOmics, quietly = TRUE)
+}
+
+if (!require(d3heatmap)) {
+  install.packages("d3heatmap", dep = TRUE, quiet = TRUE)
+  library(d3heatmap, quietly = TRUE)
+}
 
 
 body(multilevelannotation)[[25]][[4]][[3]][[169]][[2]] <- substitute({
@@ -27,6 +51,7 @@ runAutopipeline <- function(inputDir, outputDir) {
   xsg3 <- group(xsg2)
   xsg4 <- fillPeaks(xsg3)
   dat <- groupval(xsg4, "medret", "into")
+  
   dat <- rbind(group = as.character(phenoData(xsg4)$class), dat)
   
   report <- diffreport(xsg4, metlin = 0.15, h = 480, w = 640)
@@ -40,33 +65,29 @@ runAutopipeline <- function(inputDir, outputDir) {
   dir.create("HMDB")
   dir.create("KEGG")
   dir.create("LipidMaps")
-  data <- read.table("MyExpTable.txt", sep = "\t", header = T)
+  #data <- read.table("MyExpTable.txt", sep = "\t", header = T)
   
   ###### 
-  dataB <- data[, -which(names(data) %in% c("fold", "tstat", "pvalue", "anova", 
-                                            "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", "metlin"))]
-  dataB <- setNames(data.frame(t(dataB[, -1])), dataB[, 1])
-  dataB$Group <- rownames(dataB)
-  dataB$Group[3:nrow(dataB)] <- paste(phenoData(xsg1)$class)
-  dataB <- dataB[, c(ncol(dataB), 1:ncol(dataB) - 1)]
-  dataB <- dataB[-c(1,2),]
-  write.csv(dataB, file = "DownstreamAnalysInpt.csv", row.names=F)
-  
-  MetlinRes <- data[, which(names(data) %in% c("name", "mzmed", "rtmed"))]
-  names(MetlinRes)[1] <- "Metlin_ID"
-  names(MetlinRes)[2] <- "mz"
-  names(MetlinRes)[3] <- "time"
-  MetlinRes$mz <- round(MetlinRes$mz, digits = 4)
-  MetlinRes$time <- round(MetlinRes$time, digits = 1)
+  dataB<-report[,-c(which(names(report) %in% "fold"):which(names(report) %in% "anova"), which(names(report) %in% "mzmin"), which(names(report) %in% "mzmax"), which(names(report) %in% "rtmin"):which(names(report) %in% "metlin"))]
+  names(dataB)[1] <- "Metlin_ID"
+  names(dataB)[2] <- "mz"
+  names(dataB)[3] <- "time"
+  dataB$mz <- round(dataB$mz, digits = 4)
+  dataB$time <- round(dataB$time, digits = 1)
+  MetlinRes <- dataB[,c(which(names(dataB) %in% "Metlin_ID"),which(names(dataB) %in% "mz"),which(names(dataB) %in% "time"))]
   write.csv(MetlinRes, file = "MetlinRes.csv", row.names=F)
-  ###### 
+  dataC<-dataB[,-c(which(names(dataB) %in% "mz"),which(names(dataB) %in% "time"))]
+  write.csv(dataC, file = "VizInpt.csv", row.names=F)
+  dataC <- setNames(data.frame(t(dataC[, -1])), dataC[, 1])
+  dataC$Group <- rownames(dataC)
+  dataC$Group <- paste(phenoData(xsg1)$class)
+  dataC <- dataC[, c(ncol(dataC), 1:ncol(dataC) - 1)]
+  write.csv(dataC, file = "StatisticalAnalysInpt.csv", row.names=F)
+  ######
   
-  dataA <- data[, -which(names(data) %in% c("name", "fold", "tstat", "pvalue", 
-                                            "anova", "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", 
-                                            "metlin"))]
-  colnames(dataA)[1] <- "mz"
-  colnames(dataA)[2] <- "time"
+  dataA <- dataB[,-which(names(dataB) %in% "Metlin_ID")]
   write.csv(dataA, file = "AnnotationInpt.csv", row.names=F)
+  dataA <- data.frame(sapply(dataA, function(x) as.numeric(as.character(x))))
   
   data(example_data)
   data(adduct_table)
@@ -159,8 +180,7 @@ runAutopipeline <- function(inputDir, outputDir) {
   setwd(outputDir)
   write.csv(hmdb_kegg_LipidMaps3, file = "hmdb_kegg_LipidMaps3.csv", row.names=F)
   
-  MetlinRes_hmdb_kegg_LipidMaps3 <- merge(MetlinRes, hmdb_kegg_LipidMaps3, by = c("mz", 
-                                                                                  "time"), all = T)
+  MetlinRes_hmdb_kegg_LipidMaps3 <- merge(MetlinRes, hmdb_kegg_LipidMaps3, by = c("mz", "time"), all = T)
   write.csv(MetlinRes_hmdb_kegg_LipidMaps3, file = "AllMergdRes.csv", row.names=F)
   ###### 
   
@@ -173,7 +193,6 @@ runXCMS <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrat
   xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = as.numeric(ppm), peakwidth = peakwidth, snthresh = as.numeric(snthresh), prefilter = prefilter, integrate = as.numeric(integrate), mzdiff = as.numeric(mzdiff), 
                   verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(as.numeric(nSlaves)))
   
-  #xsg2 <- retcor(xsg1, method = "obiwarp", profStep = 0.01, center = 3)
   xsg2 <- retcor(xsg1, method = retcorMethod, profStep = as.numeric(profStep), center = as.numeric(center))
   xsg3 <- group(xsg2)
   xsg4 <- fillPeaks(xsg3)
@@ -187,33 +206,25 @@ runXCMS <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrat
   write.table(dat, file = "MyPeakTable.txt", sep = "\t")
   write.table(report, file = "MyExpTable.txt", sep = "\t")
   
-  
   ######
-  data <- read.table("MyExpTable.txt", sep = "\t", header = T)
-  dataB <- data[, -which(names(data) %in% c("fold", "tstat", "pvalue", "anova", 
-                                            "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", "metlin"))]
-  dataB <- setNames(data.frame(t(dataB[, -1])), dataB[, 1])
-  dataB$Group <- rownames(dataB)
-  dataB$Group[3:nrow(dataB)] <- paste(phenoData(xsg1)$class)
-  dataB <- dataB[, c(ncol(dataB), 1:ncol(dataB) - 1)]
-  dataB <- dataB[-c(1,2),]
-  write.csv(dataB, file = "DownstreamAnalysInpt.csv", row.names=F)
-  
-  MetlinRes <- data[, which(names(data) %in% c("name", "mzmed", "rtmed"))]
-  names(MetlinRes)[1] <- "Metlin_ID"
-  names(MetlinRes)[2] <- "mz"
-  names(MetlinRes)[3] <- "time"
-  MetlinRes$mz <- round(MetlinRes$mz, digits = 4)
-  MetlinRes$time <- round(MetlinRes$time, digits = 1)
-  write.csv(MetlinRes, file = "MetlinRes.csv", row.names=F)
-  ###### 
-  
-  dataA <- data[, -which(names(data) %in% c("name", "fold", "tstat", "pvalue", 
-                                            "anova", "mzmin", "mzmax", "rtmin", "rtmax", "npeaks", "blank", "QC", "sample", 
-                                            "metlin"))]
-  colnames(dataA)[1] <- "mz"
-  colnames(dataA)[2] <- "time"
+  dataB<-report[,-c(which(names(report) %in% "fold"):which(names(report) %in% "anova"), which(names(report) %in% "mzmin"), which(names(report) %in% "mzmax"), which(names(report) %in% "rtmin"):which(names(report) %in% "metlin"))]
+  names(dataB)[1] <- "Metlin_ID"
+  names(dataB)[2] <- "mz"
+  names(dataB)[3] <- "time"
+  dataB$mz <- round(dataB$mz, digits = 4)
+  dataB$time <- round(dataB$time, digits = 1)
+  write.csv(dataB[,c(which(names(dataB) %in% "Metlin_ID"),which(names(dataB) %in% "mz"),which(names(dataB) %in% "time"))], file = "MetlinRes.csv", row.names=F)
+  dataC<-dataB[,-c(which(names(dataB) %in% "mz"),which(names(dataB) %in% "time"))]
+  write.csv(dataC, file = "VizInpt.csv", row.names=F)
+  dataC <- setNames(data.frame(t(dataC[, -1])), dataC[, 1])
+  dataC$Group <- rownames(dataC)
+  dataC$Group <- paste(phenoData(xsg1)$class)
+  dataC <- dataC[, c(ncol(dataC), 1:ncol(dataC) - 1)]
+  write.csv(dataC, file = "StatisticalAnalysInpt.csv", row.names=F)
+  dataA <- dataB[,-which(names(dataB) %in% "Metlin_ID")]
   write.csv(dataA, file = "AnnotationInpt.csv", row.names=F)
+  
+  
 }
 
 
@@ -592,25 +603,7 @@ runCMI <- function(GrpMetMZ, irlba = FALSE, graphML, stats, prefix = "CMI_stats"
 
 runViz <- function(met.log, plots = F, file4name) {
   
-  if (!require(metabolomics)) {
-    install.packages("metabolomics", dep = TRUE, quiet = TRUE)
-    library(metabolomics, quietly = TRUE)
-  }
   
-  if (!require(lattice)) {
-    install.packages("lattice", dep = TRUE, quiet = TRUE)
-    library(lattice, quietly = TRUE)
-  }
-  
-  if (!require(Heatplus)) {
-    install.packages("Heatplus", dep = TRUE, quiet = TRUE)
-    library(Heatplus, quietly = TRUE)
-  }
-  
-  if (!require(mixOmics)) {
-    install.packages("mixOmics", dep = TRUE, quiet = TRUE)
-    library(mixOmics, quietly = TRUE)
-  }
   
   #met.log <- read.table("norm_BS.fil.imp.bat.csv", header=T, sep=",", row.names = 1)
   Group <- met.log$Group
@@ -768,6 +761,7 @@ runViz <- function(met.log, plots = F, file4name) {
     dev.off()
   } else if (plots == "heatmap") {
     png("heatmap.png")
+    
     heatmap(met.3)
     dev.off()
   } else if (plots == "pca") {
