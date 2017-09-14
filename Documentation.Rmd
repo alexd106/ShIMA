@@ -1,5 +1,5 @@
 ---
-title: "MetabolomicsPipeline"
+title: "ShIMA Documentation"
 runtime: shiny
 output: html_document
 ---
@@ -7,7 +7,7 @@ output: html_document
 This is an R Markdown document to provide a overview of the Metabolomics pipeline and how it works.  
 
 # Introduction
-The “Shiny Interface for Metabolite Analysis” (ShIMA) is developed in Shiny graphical user interface (GUI) environment using R. The basic idea is to provide a platform where the users can easily analyse the metabolomics datasets to identify and annotate metabolites. There is also provision for a few basic downstream analyses. The pipeline runs mainly on widely used packages such as XCMS, xMSannotator and metabolomics to perform the analysis. In-house scripts were written for automating and linking the individual analysis. The users do not need to be experts in programming in R.
+The "Shiny Interface for Metabolite Analysis" (ShIMA) is developed in Shiny graphical user interface (GUI) environment using R. The basic idea is to provide a platform where the users can easily analyse the metabolomics datasets to identify and annotate metabolites. There is also provision for a few basic downstream analyses. The pipeline runs mainly on widely used packages such as XCMS, xMSannotator and metabolomics to perform the analysis. In-house scripts were written for automating and linking the individual analysis. The users do not need to be experts in programming in R.
 
 <img src="Pipeline.png" alt="Pipeline_Home" style="width: 60%"/>
 
@@ -17,22 +17,14 @@ There are 2 main features of this pipeline; options to choose basic information 
 
 ## Autopipeline
 
-The *Autopipeline* doesn’t allow the users to change the value for the parameters and set as the default. It takes the raw metabolomics data as input and the users can select the output directory. It reads various types of raw data formats such as NetCDF, mzXML, mzData, etc.
+The *Autopipeline* doesn"t allow the users to change the value for the parameters and set as the default. It takes the raw metabolomics data as input and the users can select the output directory. It reads various types of raw data formats such as NetCDF, mzXML, mzData, etc.
 
 
 <img src="Autopipeline.png" alt="Aotopipeline" style="width: 60%"/>
 
 Figure 2: The Autopipeline tab
 
-Once the Go button is pressed, the process starts running. It pre-processes the raw data and then matches against the databases such as Metlin, HMDB, KEGG and LipidMaps. The combination of *Preprocessing* and *Annotation* tabs is the same process as the *Autopipeline* tab with with the default value of the parameters (for more details refer to *Preprocessing* and *Annotation* tab documentation). 
-
-The results of the *Autopipeline* are
-
-- Peak Table:
-- Report:
-- Metlin Identification:
-- Input for Annotation and DownStreamAnalysis Tab:
-- Identification and Annotation against various databases:
+Once the Go button is pressed, the process starts running. It pre-processes the raw data and then matches against the databases such as Metlin, HMDB, KEGG and LipidMaps. The combination of *Preprocessing* and *Annotation* tabs is the same process as the *Autopipeline* tab with the default value of the parameters (for more details refer to *Preprocessing* and *Annotation* tab documentation). 
 
 
 ## Preprocessing
@@ -43,16 +35,16 @@ Figure 3: The Preprocessing tab
 
 The pre-processing step mainly consists of steps such as reading the raw data, grouping, retention time (RT) correction, gap filling, etc. which is done using XCMS package. 
 
-This takes the raw metabolomics data formats such as mzXML, NetCDF, mzData, etc. as input. Users can define different sample groups as well as the blank, standards and quality control as different group by keeping them in separate directories inside the parental directory which is selected using the “select directory” option on the “Preprocessing” tab. The output directory can also be selected to save the outputs. 
+This takes the raw metabolomics data formats such as mzXML, NetCDF, mzData, etc. as input. Users can define different sample groups as well as the blank, standards and quality control as different group by keeping them in separate directories inside the parental directory which is selected using the "select directory" option on the "Preprocessing" tab. The output directory can also be selected to save the outputs. 
 
-Once the “Go” button is clicked it starts reading the individual raw data files (also reads inside sub directories automatically), stores into a variable and tags according to their respective subdirectory names which are considered as the sample classes with the help of the function [`xcmsSet`](https://www.rdocumentation.org/packages/xcms/versions/1.48.0/topics/xcmsSet) from XCMS. We use the `centWave` algorithm for the peak detection method which is usually “matched filter” by default in XCMS. The “centWave” algorithm is preferred in case of high-resolution MS data. There are a few parameters such as ppm, Peakwidth, Signal to noise ratio cutoff, prefilter mass traces, Number of slaves/core, Minimum difference in m/z and integration method, which are needed to be optimized based upon the particular experimental conditions. The users can see the default values in the Parameters collapsible panel and they can change it according to their interest.
+Once the "Go" button is clicked it starts reading the individual raw data files (also reads inside sub directories automatically), stores into a variable and tags according to their respective subdirectory names which are considered as the sample classes with the help of the function [`xcmsSet`](https://www.rdocumentation.org/packages/xcms/versions/1.48.0/topics/xcmsSet) from XCMS. We use the `centWave` algorithm for the peak detection method which is usually "matched filter" by default in XCMS. The "centWave" algorithm is preferred in case of high-resolution MS data. There are a few parameters such as ppm, Peakwidth, Signal to noise ratio cutoff, prefilter mass traces, Number of slaves/core, Minimum difference in m/z and integration method, which are needed to be optimized based upon the particular experimental conditions. The users can see the default values in the Parameters collapsible panel and they can change it according to their interest.
 
 <img src="PreprocessingParam.png" alt="Preprocessing Parameters" style="width: 60%"/>
 
 Figure 4: The Preprocessing tab Parameters option
 
 
-RT correction is done using [`rector`](https://www.rdocumentation.org/packages/xcms/versions/1.48.0/topics/retcor-methods) function from XCMS package. After matching peaks into groups, those groups are used to identify and correct correlated drifts in retention time from run to run. Well-behaved peak groups are selected and the median retention time is calculated and then a deviation from that for each sample. The parameters for the “rector” function can be found in the panel named Parameters and the parameters are “method” which may be “obiwarp"or “normal”, “profStep” which represents the step size (in m/z) to use for profile generation from the raw data files and center to set the index of the sample all others will be aligned to.
+RT correction is done using [`rector`](https://www.rdocumentation.org/packages/xcms/versions/1.48.0/topics/retcor-methods) function from XCMS package. After matching peaks into groups, those groups are used to identify and correct correlated drifts in retention time from run to run. Well-behaved peak groups are selected and the median retention time is calculated and then a deviation from that for each sample. The parameters for the "rector" function can be found in the panel named Parameters and the parameters are "method" which may be "obiwarp"or "normal", "profStep" which represents the step size (in m/z) to use for profile generation from the raw data files and center to set the index of the sample all others will be aligned to.
 
 
 After RT correction is done, the peaks are grouped (maintaining the tags) by choosing the peaks that represent the same analytes across samples. The [`grouping algorithm`](https://www.rdocumentation.org/packages/xcms/versions/1.48.0/topics/group-methods) processes the peak lists in order of increasing mass and regularly creates logs for the mass, it is currently working on.
@@ -97,7 +89,7 @@ Adducts - Choose adducts of interest from the list to limit the identifications.
 It takes the processed data from the output of Preprocessing tab. Users can also provide their data in the form of a comma-separated value (.csv) or tab-separated value (.txt) file as input where the first 2 columns are mz (mass) and time (retention time) respectively and all other columns contain the individual mz value for all the samples.
 
 ## StatisticalAnalysis
-The downstream analysis focuses on the significant identifications of metabolites for further analysis. The very first interest is to find the differentially expressed metabolites across all the groups. There are 3 collapsible panels; Differential Analysis, Network Analysis and Visualization. 
+The statistical analysis focuses on the significant identifications of metabolites for further analysis. The very first interest is to find the differentially expressed metabolites across all the groups. There are 2 collapsible panels; Differential Analysis and Network Analysis. 
 
 The input is prepared in such a way that the metabolite intensities (mz) will be representing the columns and the corresponding groups in the rows.
 
@@ -118,11 +110,28 @@ Similarly in case of the Network Analysis panel, the user has to mention the gro
 
 Figure 9: The Network Analysis panel on StatisticalAnalysis tab
 
+## Visualization
 The Visualization tab is simply for producing various graphs by using the output of the analysis. There are options to choose for plots to be output as .png files such as Heatmap, PCA, Level and RLA. 
 
 <img src="Visualization.png" alt="Visualization" style="width: 60%"/>
 
 Figure 10: The Visualization panel on StatisticalAnalysis tab
+
+### Heatmap
+
+The heatmap provides the expression intensities of the metabolites across the chosen groups. This helps in comparing the differential expression of metabolites in between 2 or more groups.
+
+### PCA
+
+These is basically ellipse plots representing the sample groups which are colored differently. Here the PLS-DA model from the package mixOmics has been used which is a supervised model.
+
+### Level
+
+The level plot is basically similar to a heatmap but plotted on a matrix which represents the correlation between the sample groups. 
+
+### RLA
+
+The RLA plot produces the relative log abundance plots for both within group and across group for the metabolite data matrix.
 
 # Suggestions
 - Most of the packages will be installed automatically while running the app, if not then install them manually.
@@ -133,6 +142,5 @@ Figure 10: The Visualization panel on StatisticalAnalysis tab
 
 
   
-
 
 

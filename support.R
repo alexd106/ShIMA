@@ -23,3 +23,7 @@ if(!require(DT)){
   install.packages("DT", dep=TRUE, quiet=TRUE)
   library(DT, quietly=TRUE)
 }
+if(!require(d3heatmap)){
+  install.packages("d3heatmap", dep=TRUE, quiet=TRUE)
+  library(d3heatmap, quietly=TRUE)
+}
