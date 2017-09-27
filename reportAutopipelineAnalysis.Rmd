@@ -1,0 +1,18 @@
+---
+title: "Autopipeline Analysis Report"
+
+
+---
+
+<img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
+Report generated on: `r format(Sys.time(), "%c")`
+
+
+# Input summary:
+```{r echo = FALSE}
+
+
+```
+
+# Results:
+

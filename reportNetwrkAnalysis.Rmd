@@ -1,0 +1,13 @@
+---
+title: "Network Analysis Report"
+
+
+---
+<img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
+Report generated on: `r format(Sys.time(), "%c")`
+
+
+# Input summary:
+Input file name: `r paste(filenameMet)`
+
+# Results:
