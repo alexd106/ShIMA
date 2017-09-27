@@ -1,33 +1,3 @@
-library(xcms)
-library(xMSannotator)
-library(BiocParallel)
-library(splitstackshape)
-library(mixOmics)
-
-if (!require(metabolomics)) {
-  install.packages("metabolomics", dep = TRUE, quiet = TRUE)
-  library(metabolomics, quietly = TRUE)
-}
-
-if (!require(lattice)) {
-  install.packages("lattice", dep = TRUE, quiet = TRUE)
-  library(lattice, quietly = TRUE)
-}
-
-if (!require(Heatplus)) {
-  install.packages("Heatplus", dep = TRUE, quiet = TRUE)
-  library(Heatplus, quietly = TRUE)
-}
-
-if (!require(mixOmics)) {
-  install.packages("mixOmics", dep = TRUE, quiet = TRUE)
-  library(mixOmics, quietly = TRUE)
-}
-
-if (!require(d3heatmap)) {
-  install.packages("d3heatmap", dep = TRUE, quiet = TRUE)
-  library(d3heatmap, quietly = TRUE)
-}
 
 
 body(multilevelannotation)[[25]][[4]][[3]][[169]][[2]] <- substitute({
@@ -43,8 +13,7 @@ body(multilevelannotation)[[25]][[4]][[3]][[35]][[4]][[2]][[3]][[2]] <- substitu
 
 runAutopipeline <- function(inputDir, outputDir) {
   
-  xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 
-                                                                                100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
+  xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
                   verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(10))
   
   xsg2 <- retcor(xsg1, method = "obiwarp", profStep = 0.01, center = 3)
@@ -79,9 +48,9 @@ runAutopipeline <- function(inputDir, outputDir) {
   dataC<-dataB[,-c(which(names(dataB) %in% "mz"),which(names(dataB) %in% "time"))]
   write.csv(dataC, file = "VizInpt.csv", row.names=F)
   dataC <- setNames(data.frame(t(dataC[, -1])), dataC[, 1])
-  dataC$Group <- rownames(dataC)
+  dataC$Sample <- rownames(dataC)
   dataC$Group <- paste(phenoData(xsg1)$class)
-  dataC <- dataC[, c(ncol(dataC), 1:ncol(dataC) - 1)]
+  dataC <- dataC[, c(ncol(dataC) - 1, ncol(dataC), 1:(ncol(dataC) - 2))]
   write.csv(dataC, file = "StatisticalAnalysInpt.csv", row.names=F)
   ######
   
@@ -188,7 +157,7 @@ runAutopipeline <- function(inputDir, outputDir) {
 }
 
 
-runXCMS <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrate,mzdiff,nSlaves,retcorMethod,profStep,center) {
+runPreprocess <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrate,mzdiff,nSlaves,retcorMethod,profStep,center) {
   
   xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = as.numeric(ppm), peakwidth = peakwidth, snthresh = as.numeric(snthresh), prefilter = prefilter, integrate = as.numeric(integrate), mzdiff = as.numeric(mzdiff), 
                   verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(as.numeric(nSlaves)))
@@ -217,9 +186,9 @@ runXCMS <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrat
   dataC<-dataB[,-c(which(names(dataB) %in% "mz"),which(names(dataB) %in% "time"))]
   write.csv(dataC, file = "VizInpt.csv", row.names=F)
   dataC <- setNames(data.frame(t(dataC[, -1])), dataC[, 1])
-  dataC$Group <- rownames(dataC)
+  dataC$Sample <- rownames(dataC)
   dataC$Group <- paste(phenoData(xsg1)$class)
-  dataC <- dataC[, c(ncol(dataC), 1:ncol(dataC) - 1)]
+  dataC <- dataC[, c(ncol(dataC) - 1, ncol(dataC), 1:(ncol(dataC) - 2))]
   write.csv(dataC, file = "StatisticalAnalysInpt.csv", row.names=F)
   dataA <- dataB[,-which(names(dataB) %in% "Metlin_ID")]
   write.csv(dataA, file = "AnnotationInpt.csv", row.names=F)
@@ -275,30 +244,7 @@ runAnnotation <- function(dataA, outDir, max.mz.diff, max.rt.diff, num_nodes, qu
   
 }
 
-runDiffAnalysis <- function(met, grp4comp, file2name) {
-  
-  if (!require(metabolomics)) {
-    install.packages("metabolomics", dep = TRUE, quiet = TRUE)
-    library(metabolomics, quietly = TRUE)
-  }
-  
-  if (!require(lattice)) {
-    install.packages("lattice", dep = TRUE, quiet = TRUE)
-    library(lattice, quietly = TRUE)
-  }
-  
-  if (!require(Heatplus)) {
-    install.packages("Heatplus", dep = TRUE, quiet = TRUE)
-    library(Heatplus, quietly = TRUE)
-  }
-  
-  if (!require(mixOmics)) {
-    install.packages("mixOmics", dep = TRUE, quiet = TRUE)
-    library(mixOmics, quietly = TRUE)
-  }
-  
-  
-  ################## normalise#######################
+runDiffAnalysis <- function(met, grp4comp, FparamName, FparamValue, AllPvalue, AllFCvalue, file2name) {
   
   # Normalize and rescale data to mean=0 and sd=1 Call data frame, norm
   normalizeSample <- function(x) {
@@ -330,11 +276,23 @@ runDiffAnalysis <- function(met, grp4comp, file2name) {
   #rownames(met.1) <- rownames(met)
   met.1 <- log2(met.1)
   
+  Tmet.1<-t(met.1)
+  png("rawBoxplot.png")
+  boxplot(Tmet.1, las=2, ylab="Raw intensities of Metabolites", col="sienna", pars=list(par(mar=c(15,5,2,2))), cex.axis=0.75, outline=FALSE)
+  mtext("Samples", side = 1, line = 7)
+  dev.off()
+  
   norm.feat <- normalizeFeature(met.1)
   
   norm.samp <- normalizeSample(norm.feat)
   
   norm.samp <- data.frame(norm.samp)
+  
+  Tnorm.samp<-t(norm.samp)
+  png("normBoxplot.png")
+  boxplot(Tnorm.samp, las=2, ylab="Normalized intensities of Metabolites", col="sienna", pars=list(par(mar=c(15,5,2,2))), cex.axis=0.75, outline=FALSE)
+  mtext("Samples", side = 1, line = 7)
+  dev.off()
   
   Group <- met$Group
   
@@ -343,6 +301,14 @@ runDiffAnalysis <- function(met, grp4comp, file2name) {
   write.csv(met.2, paste0("norm_", file2name, ".csv"), row.names = F)
   
   met.log <- met.2
+  
+  
+  meta<-as.matrix(met.log[,-1])
+  meta[!is.finite(meta)] <- 0
+  plsda.dol<-plsda(meta, Group, ncomp = 2, logratio = "none")
+  png("PCA.png")
+  plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+  dev.off()
   
   met.3 <- as.matrix(met.log[, -1])
   #met.log$Group <- relevel(met.log$Group, ref)
@@ -356,18 +322,16 @@ runDiffAnalysis <- function(met, grp4comp, file2name) {
   # 'BTCR30', 'BTCR40')
   attr(design, "dimnames")[[2]] <- gsub("Group", "", attr(design, "dimnames")[[2]])
   
-  if(any(grep("/",grp4comp)) == TRUE){
-    contrast.mat <- makeContrasts(contrasts = gsub("/","-",grp4comp), levels = design)
+  if(any(grep("-VS-",grp4comp)) == TRUE){
+    contrast.mat <- makeContrasts(contrasts = gsub("-VS-","-",grp4comp), levels = design)
   } else{
     ref <- grp4comp
     grpNames <- attr(design, "dimnames")[[2]]
     grpNamesWithoutRef <- grpNames[-which(ref %in% grpNames)]
-    # contrast.mat <- makeContrasts( 'BTAL24-BTAL12', 'BTCR10-BTAL12',
-    # 'BTCR20-BTAL12', 'BTCR30-BTAL12', 'BTCR40-BTAL12', levels=design)
+    # contrast.mat <- makeContrasts( 'BTAL24-BTAL12', 'BTCR10-BTAL12', 'BTCR20-BTAL12', 'BTCR30-BTAL12', 'BTCR40-BTAL12', levels=design)
     makeContrastsVar <- c()
     for (i in 1:length(grpNamesWithoutRef)) {
-      makeContrastsVar <- c(makeContrastsVar, paste0(grpNamesWithoutRef[i], "-", 
-                                                     ref))
+      makeContrastsVar <- c(makeContrastsVar, paste0(grpNamesWithoutRef[i], "-", ref))
     }
     contrast.mat <- makeContrasts(contrasts = makeContrastsVar, levels = design)
   }
@@ -386,72 +350,50 @@ runDiffAnalysis <- function(met, grp4comp, file2name) {
   
   results_F <- topTable(mod1, number = Inf, adjust = "BH")
   
-  write.csv(results_F, "Top Table of SDE Metabolites.csv")
-  
-  # sum(results_F$adj.P.Val < 0.2)
-  
-  # sum(results_F$P.Val < 0.05)
-  
-  results <- decideTests(mod1, adjust.method = "BH", p.value = 0.2)
-  
-  #### UNADJUSTED P VALUE
-  
-  results_0.05 <- decideTests(mod1, adjust.method = "none", p.value = 0.05)
+  colnames(results_F)[1:(which(colnames(results_F) %in% "AveExpr")-1)] <- gsub("\\.", "-VS-",colnames(results_F)[1:(which(colnames(results_F) %in% "AveExpr")-1)])
+  results_F <- results_F[which(results_F[,which(names(results_F) %in% FparamName)] <= FparamValue),]
+  write.csv(results_F, paste0("Fstats_", file2name, ".csv"))
   
   mod1$genes <- data.frame(metabolites = rownames(mod1))
-  
   # write a file containing all the test statistic, pvalues etc for each contrast
   
-  write.fit(mod1, file = "BAT.SDE.mets.csv", adjust = "BH", F.adjust = "BH", method = "separate", 
-            sep = ",")
   
+  mod2 <- eBayes(mod1)
+  results <- decideTests(mod2)
+  
+  
+  write.fit(mod1, results=, file = paste0("AllStats_", file2name, ".csv"), adjust = "BH", F.adjust = "BH", method = "separate", 
+            sep = ",")
+  results_F1 <- read.csv(paste0("AllStats_", file2name, ".csv"), header=T)
+  results_F1<-results_F1[,c(ncol(results_F1), 1:(ncol(results_F1) - 1))]
+  colnames(results_F1)[3:(which(colnames(results_F1) %in% "F")-1)] <- gsub("(.*)\\.(.*)", "\\1-VS-\\2",colnames(results_F1)[3:(which(colnames(results_F1) %in% "F")-1)])
+  results_F1 <- results_F1[which(results_F1[,which(names(results_F1) %in% "F.p.value")] <= AllPvalue),]
+  
+  print(dim(results_F1))
+  if(AllFCvalue == "NULL"){
+    results_F1 <- results_F1
+  } else{
+  for(j in 1:length(names(results_F1[grepl("Coef", names(results_F1))]))){
+    results_F1<-results_F1[which(results_F1[,which(names(results_F1) %in% names(results_F1[grepl("Coef", names(results_F1))])[j])] <= AllFCvalue),]
+  }
+  }
+  print(dim(results_F1))
+  write.csv(results_F1, paste0("AllStats_", file2name, ".csv"), row.names=F)
+  
+  
+  # For the Report
+  save(Tmet.1, Tnorm.samp, mod2, plsda.dol, cormat, contrast.mat, results_F, results, results_F1, file="runDiffAnalysisRes.Rdata")
   
 }
 
 runCMI <- function(GrpMetMZ, irlba = FALSE, graphML, stats, prefix = "CMI_stats") {
   
   
-  # check if required packages are installed. If not install.
-  if (!require(minet)) {
-    install.packages("minet", dep = TRUE, quiet = TRUE)
-    library(minet, quietly = TRUE)
-  }
-  
-  if (!require(igraph)) {
-    install.packages("igraph", dep = TRUE, quiet = TRUE)
-    library(igraph, quietly = TRUE)
-  }
-  
-  if (!require(data.table)) {
-    install.packages("data.table", dep = TRUE, quiet = TRUE)
-    library(data.table, quietly = TRUE)
-  }
-  
-  if (irlba == TRUE) {
-    if (!require(irlba)) {
-      install.packages("irlba", dep = TRUE, quiet = TRUE)
-      library(irlba, quietly = TRUE)
-    }
-  }
-  
-  if (!require(qdap)) {
-    install.packages("qdap", dep = TRUE, quiet = TRUE)
-    library(qdap, quietly = TRUE)
-  }
-  
-  if (!require(Matrix)) {
-    install.packages("Matrix", dep = TRUE, quiet = TRUE)
-    library(Matrix, quietly = TRUE)
-  }
-  
-  
-   
-  
   GrpMetMZ[GrpMetMZ == 0] <- 0.0001
   GrpMetMZ[GrpMetMZ == Inf] <- 0.0001
   
                            
-  metMZ.mi <- minet(GrpMetMZ[, 2:length(GrpMetMZ)], method = "aracne", estimator = "mi.mm", 
+  metMZ.mi <- minet(GrpMetMZ[, 3:length(GrpMetMZ)], method = "aracne", estimator = "mi.mm", 
                     disc = "equalwidth")
   write.csv(metMZ.mi, file = "metMZmi.csv")
   AI <- metMZ.mi

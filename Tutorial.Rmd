@@ -98,7 +98,7 @@ The StatisticalAnalysis tab provides 2 panels. The first one provides the differ
 
 The input file for this tab is a csv file configured by the users similar to that of the output file of the Autopipeline which can also be directly used as the input (Fig-4a). The input file structure is same in case of both the panels under this tab.
 
-The users should choose one of the option between "Reference" or "Groups" to find several options to again choose the groups to be compared for the Differential Analysis.
+The users should choose one of the option between "Reference" or "Groups" to find several options to again choose the groups to be compared for the Differential Analysis. There are options for choosing cut-offs for the p value , adjusted p value and the fold change. Just input as per the interest to subset the result data. 
 
 Similarly, in case of Network Analysis, the users can select groups for subsetting from the parent input files. The users can also select checkboxes to allow the network statistics and graphml file to be included in the output.
 

@@ -3,12 +3,13 @@
   source("support.R")
   
   if(interactive()){
-    ui <- fluidPage(tags$style(type = "text/css", ".navbar {background-color: #004d5a; font-size:120%; }"),
+    ui <- fluidPage(shinyjs::useShinyjs(), tags$style(type = "text/css", ".navbar {background-color: #004d5a; font-size:120%; }"),
     h1(tags$hr(style="background-color: grey; height: 2px; border:none"), 
       img(src="ShIMA.png", height="50px", align = "left"),
       "Shiny Interface for Metabolite Analysis", align = "center", style = "color:white; font-weight: 900; background-color:#008B8C; font-family:; font-size:200%;",
       tags$hr(style="background-color: grey; height: 2px; border:none")),
     navbarPage(inverse=TRUE,"",
+               
       tabPanel("Home", 
                column(12,
                     column(3,
@@ -77,8 +78,11 @@
                   tags$br(),
                   tags$br(),
                   tags$br(),
+                  
+                  actionButton("go1", "GO", style="float:right"),
                   tags$br(),
-                  actionButton("go1", "GO", style="float:right")
+                  radioButtons('formatAutopipelineAnalysis', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
+                  downloadButton("reportAutopipelineAnalysis", "Generate report")
                 )
                   
                 )
@@ -235,7 +239,9 @@
           tags$br(),
           actionButton("go2", "GO", style="float:right"),
           tags$br(),
-          tags$br()
+          tags$br(), 
+          radioButtons('formatProcessAnalysis', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
+          downloadButton("reportProcessAnalysis", "Generate report")
           #verbatimTextOutput("ppm")         
           ),
           tabPanel(title = tags$b("Annotation"), value = "panel3", 
@@ -401,7 +407,9 @@
        tags$br(),
        actionButton("go3", "GO", style="float:right"),
        tags$br(),
-       tags$br()
+       tags$br(), 
+       radioButtons('formatAnnotAnalysis', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
+       downloadButton("reportAnnotAnalysis", "Generate report")
        ),
        tabPanel(title = tags$b("StatisticalAnalysis"), value = "panel4", 
          bsCollapse(id = "collapse3", 
@@ -419,17 +427,52 @@
                          ),
                    column(6, style="background-color: lightgrey;",h4(tags$u("Choose groups for comparision")),
                           #textInput("ref", "Mention the reference group name:", "Type here"),
-                          
-                          radioButtons('comp', '', c(Reference='refGrp',  Groups='grpComb'), ','),
-                          selectizeInput("grp4comp", label="", choices="", multiple=TRUE)
-                          
-                         )
+                          column(3,
+                          radioButtons('comp', '', c(Reference='refGrp',  Groups='grpComb'), 'refGrp')
+                          ),
+                          column(9,
+                                 selectizeInput("grp4comp", label="", choices="", multiple=TRUE)
+                          )
+                         ),
+                   
+                   
+                   column(6, style="background-color: lightgrey;",h4(tags$u("Cutt offs for statistical parameters")),
+                     h6(tags$u("F Statistics")),
+                            column(3,
+                                   radioButtons('Fparam', '', c(P='Fpvalue',  Adj.P='Fadjpvalue'), 'Fpvalue')
+                            ),
+                            column(6,
+                                   numericInput("FparamValue", "Value < =", 1, step = 0.1)
+                            )
+                           
+                       
+                     ),
+                   column(6, style="background-color: lightgrey;", h6(tags$u("All Statistics")),
+                   column(6,
+                       numericInput("Allpvalue", "P Value < =", 1, step = 0.1)
+                       ),
+                   column(6,
+                          textInput("Allfcvalue", "log(Fold Change) < =", "")
+                          #numericInput("Allfcvalue", "log(Fold Change) < =", maxCoef)
+                     
+                   )
+                )                
+                  
                 ),
                 column(12, style="background-color: lightgrey;",
-                     actionButton("go4", "GO", style="float:right"),
-                     tags$br() 
-                     
-                    
+                       column(6
+                       ),
+                       column(6,tags$hr(style="border-top: 1px solid #8c8b8b;"), 
+                       column(6, 
+                              radioButtons('formatDiffAnalysis', '', c('PDF', 'HTML', 'Word'), inline = TRUE),
+                              downloadButton("reportDiffAnalysis", "Generate report")
+                       ),
+                     column(6,
+                            tags$br(),tags$br(),
+                            actionButton("go4", "GO", style="float:right")
+                      
+                     )
+                       )
                       )
                    )
                 ),
@@ -457,7 +500,10 @@
                         ),
                 column(12, style="background-color: lightgrey;",
                        actionButton("go5", "GO", style="float:right"),
-                       tags$br()       
+                       tags$br(), 
+                       radioButtons('formatNetwrkAnalysis', 'Document format', c('PDF', 'HTML', 'Word'), inline = TRUE),
+                       downloadButton("reportNetwrkAnalysis", "Generate report")
+                       
                       ) 
                 
                    )
@@ -472,47 +518,108 @@
          ),
        
        tabPanel(title = tags$b("Visualization"), value = "panel5", 
-         bsCollapse(id = "collapse4",
-           bsCollapsePanel("Visualization", style = "info",
+         bsCollapse(id = "collapse4", open = "Visualization",
+           bsCollapsePanel("Visualization", style = "info", 
              fluidPage(
-               tabsetPanel(id = "inTabset1",           
+               navbarPage("",
+                                     
                  tabPanel(title = tags$b("Heatmap"), value = "panel4.1", 
                    fixedRow(
                      column(12, style="background-color: lightgrey;",
                        column(6, h4(tags$u("Upload data")), style="background-color: lightgrey;", 
                                  fileInput('file4_1', '', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
                                  checkboxInput('header', 'Header', TRUE),
-                                 radioButtons('sep3_1', 'Separator', c(Comma=',',  Tab='\t'), ','),
-                                 shinyDirButton('directory4_3_1', 'Output directory', 'Please select a folder'),
-                                 verbatimTextOutput('directorypath4_3_1')
+                                 radioButtons('sep3_1', 'Separator', c(Comma=',',  Tab='\t'), ',')
+                                 
                              ),
-                        column(6, style="background-color: white;", 
-                                  plotOutput("plotHeatmap")    
+                        column(6, tags$br(),tags$br(),
+                               
+                               actionButton("go6_1", "GO", style="float:right")
+                                  
                                )
-                            ),
-                     column(12, style="background-color: lightgrey;",
-                                actionButton("go6_1", "GO", style="float:right"),
-                                tags$br() 
-                           )
-                   )
+                            )
+                     
                            ),
-                   
-                   
+                 
                    
                    
                      column(12, tags$hr(),
                             
+                            downloadButton("downloadHeatmap", "Download"),
+                            #plotOutput("plotHeatmap")
                             d3heatmapOutput("plotHeatmapInteract")    
                      
                    
-                        ),
-                 tabPanel(title = tags$b("PCA Plot"), value = "panel4.2" 
+                        )),
+                 tabPanel(title = tags$b("PCA Plot"), value = "panel4.2",
+                          fixedRow(
+                            column(12, style="background-color: lightgrey;",
+                                   column(6, h4(tags$u("Upload data")), style="background-color: lightgrey;", 
+                                          fileInput('file4_2', '', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+                                          checkboxInput('header', 'Header', TRUE),
+                                          radioButtons('sep3_2', 'Separator', c(Comma=',',  Tab='\t'), ',')
+                                          
+                                         ),
+                                   column(6, tags$br(),tags$br(),
+                                          
+                                          actionButton("go6_2", "GO", style="float:right")
+                                          
+                                         )
+                                  )
+                                  ),
                           
+                          column(12, tags$hr(),
+                                 downloadButton("downloadPCA", "Download"),
+                                 plotOutput("plotPCA")
+                           
+                          ) 
                          ),
-                 tabPanel(title = tags$b("RLA Plot"), value = "panel4.3"
+                 tabPanel(title = tags$b("RLA Plot"), value = "panel4.3",
+                          fixedRow(
+                            column(12, style="background-color: lightgrey;",
+                                   column(6, h4(tags$u("Upload data")), style="background-color: lightgrey;", 
+                                          fileInput('file4_3', '', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+                                          checkboxInput('header', 'Header', TRUE),
+                                          radioButtons('sep3_3', 'Separator', c(Comma=',',  Tab='\t'), ',')
+                                          
+                                   ),
+                                   column(6, tags$br(),tags$br(),
+                                          
+                                          actionButton("go6_3", "GO", style="float:right")
+                                          
+                                   )
+                            )
+                          ),
+                          
+                          column(12, tags$hr(),
+                                 downloadButton("downloadRLA", "Download"),
+                                 plotOutput("plotRLA")
+                                 
+                          )
                                                                   
                          ),
-                 tabPanel(title = tags$b("Level Plot"), value = "panel4.4"
+                 tabPanel(title = tags$b("Level Plot"), value = "panel4.4",
+                          fixedRow(
+                            column(12, style="background-color: lightgrey;",
+                                   column(6, h4(tags$u("Upload data")), style="background-color: lightgrey;", 
+                                          fileInput('file4_4', '', accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
+                                          checkboxInput('header', 'Header', TRUE),
+                                          radioButtons('sep3_4', 'Separator', c(Comma=',',  Tab='\t'), ',')
+                                          
+                                   ),
+                                   column(6, tags$br(),tags$br(),
+                                          
+                                          actionButton("go6_4", "GO", style="float:right")
+                                          
+                                   )
+                            )
+                          ),
+                          
+                          column(12, tags$hr(),
+                                 downloadButton("downloadLevel", "Download"),
+                                 plotOutput("plotLevel")
+                                 
+                          )
                                                                   
                          )
                                                          
@@ -569,6 +676,18 @@
     #volumes <- c('R Installation'=R.home())
     volumes <- c("UserFolder"="/home/s03js6/JeeTzzz")
     #volumes <- getVolumes()
+    
+    shinyjs::disable("reportAutopipelineAnalysis")
+    shinyjs::disable("reportProcessAnalysis")
+    shinyjs::disable("reportAnnotAnalysis")
+    shinyjs::disable("reportDiffAnalysis")
+    shinyjs::disable("reportNetwrkAnalysis")
+    shinyjs::disable("downloadHeatmap")
+    shinyjs::disable("downloadPCA")
+    shinyjs::disable("downloadRLA")
+    shinyjs::disable("downloadLevel")
+    
+    
     shinyDirChoose(input, 'directory1_1', roots=volumes, session=session, restrictions=system.file(package='base'))
     output$directorypath1_1 <- renderText({if(is.null(input$directory1_1)){"None Selected"}else{parseDirPath(volumes, input$directory1_1)}})
     shinyDirChoose(input, 'directory1_2', roots=volumes, session=session, restrictions=system.file(package='base'))
@@ -585,9 +704,7 @@
     output$directorypath4_1 <- renderText({if(is.null(input$directory4_1)){"None Selected"}else{parseDirPath(volumes, input$directory4_1)}})
     shinyDirChoose(input, 'directory4_2', roots=volumes, session=session, restrictions=system.file(package='base'))
     output$directorypath4_2 <- renderText({if(is.null(input$directory4_2)){"None Selected"}else{parseDirPath(volumes, input$directory4_2)}})
-    shinyDirChoose(input, 'directory4_3_1', roots=volumes, session=session, restrictions=system.file(package='base'))
-    output$directorypath4_3_1 <- renderText({if(is.null(input$directory4_3_1)){"None Selected"}else{parseDirPath(volumes, input$directory4_3_1)}})
-    
+   
     source("pipeline.R")
     
     observeEvent(input$go, {
@@ -601,7 +718,7 @@
     
     
     observeEvent(input$go1, {
-      
+      cwd<-getwd()
       #validate(
       #  need(input$directory1_1 == "", 'select input directory!'),
       #  need(input$directory1_2 == "", 'select output directory!')
@@ -611,6 +728,32 @@
       outputDir<-print({parseDirPath(volumes, input$directory1_2)})
       
       runAutopipeline(inputDir,outputDir)
+      
+      
+      setwd(cwd)
+      shinyjs::enable("reportAutopipelineAnalysis")
+      output$reportAutopipelineAnalysis <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = function() {
+          paste('reportAutopipelineAnalysis', sep = '.', switch(
+            input$formatAutopipelineAnalysis, PDF = 'pdf', HTML = 'html', Word = 'docx'
+          ))
+        },
+        
+        content = function(file) {
+          
+          src <- normalizePath('reportAutopipelineAnalysis.Rmd')
+          owd <- setwd(tempdir())
+          on.exit(setwd(owd))
+          file.copy(src, 'reportAutopipelineAnalysis.Rmd', overwrite = TRUE)
+          out <- render('reportAutopipelineAnalysis.Rmd', switch(
+            input$formatAutopipelineAnalysis,
+            PDF = pdf_document(), HTML = html_document(), Word = word_document()
+          ))
+          file.rename(out, file)
+        }
+      )
+      
       print("Job Done...")
       
       
@@ -618,9 +761,8 @@
     
       
     observeEvent(input$go2, {
-#      output$ppm <- renderText({ input$peakwidth[1] })
-      
-#      setwd("print({parseDirPath(volumes, input$directory2_1)})")
+      cwd<-getwd()
+
      
       inputDir<-print({parseDirPath(volumes, input$directory2_1)})
       outputDir<-print({parseDirPath(volumes, input$directory2_2)})
@@ -635,7 +777,32 @@
       retcorMethod=input$var
       profStep=input$profStep
       center=input$center
-      runXCMS(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrate,mzdiff,nSlaves,retcorMethod,profStep,center)
+      runPreprocess(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,integrate,mzdiff,nSlaves,retcorMethod,profStep,center)
+      
+      setwd(cwd)
+      shinyjs::enable("reportProcessAnalysis")
+      output$reportProcessAnalysis <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = function() {
+          paste('reportProcessAnalysis', sep = '.', switch(
+            input$formatProcessAnalysis, PDF = 'pdf', HTML = 'html', Word = 'docx'
+          ))
+        },
+        
+        content = function(file) {
+          
+          src <- normalizePath('reportProcessAnalysis.Rmd')
+          owd <- setwd(tempdir())
+          on.exit(setwd(owd))
+          file.copy(src, 'reportProcessAnalysis.Rmd', overwrite = TRUE)
+          out <- render('reportProcessAnalysis.Rmd', switch(
+            input$formatProcessAnalysis,
+            PDF = pdf_document(), HTML = html_document(), Word = word_document()
+          ))
+          file.rename(out, file)
+        }
+      )
+      
       print("Job Done...")
       
     })
@@ -643,15 +810,7 @@
     
     
     observeEvent(input$go3, {
-      #output$txt <- renderText({ 
-        
-       # withProgress(message = 'Running...Wait...', value = 0.1, {
-        #  Sys.sleep(0.25)
-        #})
-        
-        
-        #print("Job Done")
-      #})
+      cwd<-getwd()
       
       
       inFile1 <- input$file1
@@ -677,29 +836,52 @@
       
       
       runAnnotation(dataA,outDir,max.mz.diff,max.rt.diff,num_nodes,queryadductlist,mode,db_name,num_sets,corthresh,status,max_isp,mass_defect_window)
+      
+      setwd(cwd)
+      shinyjs::enable("reportAnnotAnalysis")
+      output$reportAnnotAnalysis <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = function() {
+          paste('reportAnnotAnalysis', sep = '.', switch(
+            input$formatAnnotAnalysis, PDF = 'pdf', HTML = 'html', Word = 'docx'
+          ))
+        },
+        
+        content = function(file) {
+          
+          src <- normalizePath('reportAnnotAnalysis.Rmd')
+          owd <- setwd(tempdir())
+          on.exit(setwd(owd))
+          file.copy(src, 'reportAnnotAnalysis.Rmd', overwrite = TRUE)
+          out <- render('reportAnnotAnalysis.Rmd', switch(
+            input$formatAnnotAnalysis,
+            PDF = pdf_document(), HTML = html_document(), Word = word_document()
+          ))
+          file.rename(out, file)
+        }
+      )
+      
       print("Job Done...")
-      
-      #system.time(annotres<-multilevelannotation(dataA=dataA,,,,,,,,, ,,allsteps=TRUE,,NOPS_check=TRUE,customIDs=customIDs,missing.value=NA,deepsplit=2,networktype="unsigned",minclustsize=10,module.merge.dissimilarity=0.2,filter.by=c("M+H"),,origin=NA,,boostIDs=NA,,HMDBselect="union",,pathwaycheckmode="pm",mass_defect_mode="pos"))
-      #setwd("print({parseDirPath(volumes, input$directory3_1)})")
-      #d1$mz<-round(d1$mz, digits=4)
-      #inFile1$time<-round(d1$time, digits=1)
-      #d2<-read.csv("Stage5.csv",header=T)
-      #d<-merge(d1, d2, by=c("mz","time"))
-      
+     
       })
     
     observe({
+      shinyFileChoose(input, "file2", roots = volumes, session = session)
+      
       inFile2 <- input$file2
     if (is.null(inFile2))
       return(NULL)
-    met<-read.table(inFile2$datapath, header=input$header, sep=input$sep1)
+    met<-read.table(inFile2$datapath, header=input$header, sep=input$sep1, row.names=1)
+    filenameMet <- inFile2$name
+    pathMet <- renderText({parseFilePaths(volumes, input$file2)})
+     
     file2name <- print(gsub(".txt|.csv", "",inFile2$name))
     tmpGrp = met$Group
     
     grpUniq<-unique(tmpGrp)
     grpSel <- c()
     for (i in 1:length(grpUniq)) {
-      grpSel <- c(grpSel, paste0(grpUniq[i], "/",grpUniq[-which(grpUniq %in% grpUniq[i])]))
+      grpSel <- c(grpSel, paste0(grpUniq[i], "-VS-",grpUniq[-which(grpUniq %in% grpUniq[i])]))
       
     }
     
@@ -711,27 +893,66 @@
       updateSelectizeInput(session,'grp4comp', choices=grpSel, selected=grpSel[1:2])
     }
       
-      
-      
-  
-    save(met,file2name, file="met.RData")
+
+    save(met,file2name,filenameMet,pathMet, file="met.RData")
     })
     
     #source("runDiffAnalysis.R")
       observeEvent(input$go4, {
       
       load("met.RData")
-      
+     
       grp4comp=print(input$grp4comp)
       
+      Fpvalue <- "Fpvalue"  %in% input$Fparam
+      Fadjpvalue <- "Fadjpvalue"  %in% input$Fparam
+      if (Fpvalue){
+        FparamName<-"P.Value"
+      } else if (Fadjpvalue){
+        FparamName<-"adj.P.Val"
+      }
+      FparamValue<-input$FparamValue
+      
+      AllPvalue<-input$Allpvalue
+      if(input$Allfcvalue == ""){
+        AllFCvalue <- "NULL"
+      } else if(is.na(as.numeric(input$Allfcvalue))){
+        AllFCvalue <- "NULL"
+      } else{
+        AllFCvalue<-as.numeric(input$Allfcvalue)
+      }
+      print(AllFCvalue)
       outputDir<-print({parseDirPath(volumes, input$directory4_1)})
-      #cwd<-getwd()
+      cwd<-getwd()
       setwd(outputDir)
       dir.create("runDiffAnalysisRes")
       setwd("runDiffAnalysisRes")
-      runDiffAnalysis(met, grp4comp, file2name)
-      setwd(outputDir)
-      #setwd(cwd)
+      runDiffAnalysis(met, grp4comp, FparamName, FparamValue, AllPvalue, AllFCvalue, file2name)
+      
+      setwd(cwd)
+      shinyjs::enable("reportDiffAnalysis")
+      output$reportDiffAnalysis <- downloadHandler(
+        # For PDF output, change this to "report.pdf"
+        filename = function() {
+          paste('reportDiffAnalysis', sep = '.', switch(
+            input$formatDiffAnalysis, PDF = 'pdf', HTML = 'html', Word = 'docx'
+          ))
+        },
+        
+        content = function(file) {
+         
+          src <- normalizePath('reportDiffAnalysis.Rmd')
+          owd <- setwd(tempdir())
+          on.exit(setwd(owd))
+          file.copy(src, 'reportDiffAnalysis.Rmd', overwrite = TRUE)
+          out <- render('reportDiffAnalysis.Rmd', switch(
+            input$formatDiffAnalysis,
+            PDF = pdf_document(), HTML = html_document(), Word = word_document()
+          ))
+          file.rename(out, file)
+        }
+      )
+      
       print("Job Done...")
         
       })
@@ -746,14 +967,16 @@
         inFile3 <- input$file3
         if (is.null(inFile3))
           return(NULL)
-        metMZ<-read.table(inFile3$datapath, header=input$header, sep=input$sep2)
+        metMZ<-read.table(inFile3$datapath, header=input$header, sep=input$sep2, row.names=1)
+        filenameMet <- inFile3$name
+        file3name <- print(gsub(".txt|.csv", "",inFile3$name))
         tmpgroups = metMZ$Group
         updateSelectizeInput(session,'grp', choices=tmpgroups, selected=tmpgroups)
-        save(metMZ, file="metMZ.RData")
+        save(metMZ,file3name,filenameMet, file="met.RData")
         })
         
         observeEvent(input$go5, {
-        load("metMZ.RData")
+        load("met.RData")
         Grp=print(input$grp)
         if(Grp=="ALL"){
           GrpMetMZ <- metMZ
@@ -778,13 +1001,37 @@
           stats <- "stats"
         } 
         outputDir<-print({parseDirPath(volumes, input$directory4_2)})
-        #cwd<-getwd()
+        cwd<-getwd()
         setwd(outputDir)
         dir.create("runCMIanalysisRes")
         setwd("runCMIanalysisRes")
         runCMI(GrpMetMZ, irlba = FALSE, graphML = graphML, stats = stats, prefix = "CMI_stats")
         setwd(outputDir)
-        #setwd(cwd5)
+        
+        setwd(cwd)
+        shinyjs::enable("reportNetwrkAnalysis")
+        output$reportNetwrkAnalysis <- downloadHandler(
+          # For PDF output, change this to "report.pdf"
+          filename = function() {
+            paste('reportNetwrkAnalysis', sep = '.', switch(
+              input$formatNetwrkAnalysis, PDF = 'pdf', HTML = 'html', Word = 'docx'
+            ))
+          },
+          
+          content = function(file) {
+            
+            src <- normalizePath('reportNetwrkAnalysis.Rmd')
+            owd <- setwd(tempdir())
+            on.exit(setwd(owd))
+            file.copy(src, 'reportNetwrkAnalysis.Rmd', overwrite = TRUE)
+            out <- render('reportNetwrkAnalysis.Rmd', switch(
+              input$formatNetwrkAnalysis,
+              PDF = pdf_document(), HTML = html_document(), Word = word_document()
+            ))
+            file.rename(out, file)
+          }
+        )
+        
         print("Job Done...")
         
         })
@@ -801,28 +1048,168 @@
           file4_1name <- print(gsub(".txt|.csv", "",inFile4_1$name))
           
           met.3 <- as.matrix(met.log)
-          output$plotHeatmap <- renderPlot({heatmap(met.3)})
-          outputDir<-print({parseDirPath(volumes, input$directory4_3_1)})
           
           output$plotHeatmapInteract <- renderD3heatmap({
-            d3heatmap(met.log, scale = "column")
-            })
+          withProgress(message = 'Plotting heatmap:', value = 0, {
+          n <- NROW(met.log)
+          for (i in 1:n) {
+            incProgress(1/n, detail = "Please wait...")
+            #incProgress(1/n, detail = paste("Percentage completed:", (i/n)*100, "%"))
+          }
+          d3heatmap(met.log, scale = "column")
+          })
+          })
           
-          #cwd<-getwd()
-          setwd(outputDir)
-          dir.create("runVizRes")
-          setwd("runVizRes")
-          png("heatmap.png")
-          heatmap(met.3)
-          dev.off()
-          #plots <- "heatmap"
-          #runViz(met.log, plots, file4name)
-          setwd(outputDir)
-          #setwd(cwd)
+          shinyjs::enable("downloadHeatmap")
+          
+          output$downloadHeatmap <- downloadHandler(
+            filename <- "heatmap.png",
+            content <- function(file) {
+              png(file)
+              
+              heatmap(met.3)
+              dev.off()
+            }
+          )
+         
+          print("Job Done...")
+          
+          
+        })
+        
+        
+        observeEvent(input$go6_2, {
+          
+          
+          inFile4_2 <- input$file4_2
+          if (is.null(inFile4_2))
+            return(NULL)
+          met.log<-read.table(inFile4_2$datapath, header=input$header, sep=input$sep3_2)
+          file4_2name <- print(gsub(".txt|.csv", "",inFile4_2$name))
+          
+          Group <- met.log$Group
+          meta<-as.matrix(met.log[,-1])
+          
+          # replace all non-finite values with 0
+          meta[!is.finite(meta)] <- 0
+          
+          plsda.dol<-plsda(meta, Group, ncomp = 2, logratio = "none")
+          
+          
+          output$plotPCA <- renderPlot({
+            withProgress(message = 'Plotting PCA plot:', value = 0, {
+              n <- NROW(met.log)
+              for (i in 1:n) {
+                incProgress(1/n, detail = "Please wait...")
+                #incProgress(1/n, detail = paste("Percentage completed:", (i/n)*100, "%"))
+              }
+              plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+              
+            })
+          })
+          
+          shinyjs::enable("downloadPCA")
+          
+          output$downloadPCA <- downloadHandler(
+            filename <- "PCA.png",
+            content <- function(file) {
+              png(file)
+              
+              plotIndiv(plsda.dol, ellipse=TRUE, legend=TRUE, title="Individual Group's score", legend.position="bottom")
+              
+              dev.off()
+            }
+          )
+          
           print("Job Done...")
           
         })
         
+        
+        observeEvent(input$go6_3, {
+          
+          
+          inFile4_3 <- input$file4_3
+          if (is.null(inFile4_3))
+            return(NULL)
+          met.log<-read.table(inFile4_3$datapath, header=input$header, sep=input$sep3_3)
+          file4_3name <- print(gsub(".txt|.csv", "",inFile4_3$name))
+          
+          
+          
+          
+          output$plotRLA <- renderPlot({
+            withProgress(message = 'Plotting RLA plot:', value = 0, {
+              n <- NROW(met.log)
+              for (i in 1:n) {
+                incProgress(1/n, detail = "Please wait...")
+                #incProgress(1/n, detail = paste("Percentage completed:", (i/n)*100, "%"))
+              }
+              par(mfrow=c(1,2))
+              RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, -5))  #across groups
+              RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, -5))  #within groups
+            })
+          })
+          
+          shinyjs::enable("downloadRLA")
+          
+          output$downloadRLA <- downloadHandler(
+            filename <- "RLA.png",
+            content <- function(file) {
+              png(file)
+              par(mfrow=c(1,2))
+              RlaPlots(met.log, main = "RLA Plot Across Groups", type = "ag", ylim = c(5, -5))  #across groups
+              RlaPlots(met.log, main = "RLA Plot Within Groups", type = "wg", ylim = c(5, -5))  #within groups
+              dev.off()
+            }
+          )
+          
+          print("Job Done...")
+          
+        })
+        
+        observeEvent(input$go6_4, {
+          
+          
+          inFile4_4 <- input$file4_4
+          if (is.null(inFile4_4))
+            return(NULL)
+          met.log<-read.table(inFile4_4$datapath, header=input$header, sep=input$sep3_4)
+          file4_4name <- print(gsub(".txt|.csv", "",inFile4_4$name))
+          
+          
+          met.3 <- as.matrix(met.log[, -1])
+          trans.met.log <- t(met.log[, -1])
+          colnames(trans.met.log) <- met.log[, 1]
+          cormat <- cor(trans.met.log, use = "complete.obs")
+          
+          
+          output$plotLevel <- renderPlot({
+            withProgress(message = 'Plotting Level plot:', value = 0, {
+              n <- NROW(met.log)
+              for (i in 1:n) {
+                incProgress(1/n, detail = "Please wait...")
+                #incProgress(1/n, detail = paste("Percentage completed:", (i/n)*100, "%"))
+              }
+              levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))              
+            })
+          })
+          
+          shinyjs::enable("downloadLevel")
+          
+          output$downloadLevel <- downloadHandler(
+            filename <- "LevelPlot.png",
+            content <- function(file) {
+              png(file)
+              
+              levelplot(cormat, main = "Correlation between samples", scales = list(x = list(rot = 90)))              
+              dev.off()
+            }
+          )
+          
+          print("Job Done...")
+          
+        })
     
      }
   

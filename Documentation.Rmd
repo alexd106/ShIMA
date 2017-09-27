@@ -98,13 +98,13 @@ The input is prepared in such a way that the metabolite intensities (mz) will be
 
 Figure 7: The StatisticalAnalysis tab
 
-The Differential Analysis results in differential expression of the data. It provides 2 optionss  which are using Reference and Groups to chose the groups for comparsion of level of differential expressions. The reference can be selected and it will perform all the possible combinations of groups, keeping the chosen one as the control. The second option Groups provides all the possible combinations of the groups to choose one by one to customize the output.
+The Differential Analysis results in differential expression of the data. It provides 2 options  which are using Reference and Groups to chose the groups for comparsion of level of differential expressions. The reference can be selected and it will perform all the possible combinations of groups, keeping the chosen one as the control. The second option Groups provides all the possible combinations of the groups to choose one by one to customize the output. Except these options, there are a few other options to chose cutt-offs for the data based upon p-value, adjusted p-value and log fold change. The users can easily type in the value for these parameters and it will be suseted from the entire results and be presented.
 
 <img src="DifferentialAnalysis.png" alt="DifferentialAnalysis" style="width: 60%"/>
 
 Figure 8: The Differential Analysis panel on StatisticalAnalysis tab
 
-Similarly in case of the Network Analysis panel, the user has to mention the group name for choosing the data to be subset and used as input. Then it constructs mutual information network on the selected data. The network file can be saved in .graphml format which can be used further in graph visualization tools such as Gephi. A file will be generated containing the network properties from the statistical analysis of the network.
+Similarly in case of the Network Analysis panel, the user has to mention the group name for choosing the data to be subset and used as input. Then it constructs mutual information network on the selected data. The mutual information calculated here is actually the conditional mutual information (CMI) with the help of [`minet`](https://www.rdocumentation.org/packages/minet/versions/3.30.0/topics/minet) function from the package minet which is "Mutual Information NETworks". It calculates the mutual information between all pairs of variables in the provided input and creates the adjacency matrix. Then the adjacency matrix is converted to igraph object using [`graph_from_adjacency_matrix`](https://www.rdocumentation.org/packages/igraph/versions/1.1.2/topics/graph_from_adjacency_matrix) function from igraph. Further several network properties were calculated for the entire network. The network file can be saved in .graphml format which can be used further in graph visualization tools such as Gephi. A file will be generated containing the network properties from the statistical analysis of the network.
 
 <img src="NetworkAnalysis.png" alt="NetworkAnalysis" style="width: 60%"/>
 
@@ -119,19 +119,24 @@ Figure 10: The Visualization panel on StatisticalAnalysis tab
 
 ### Heatmap
 
-The heatmap provides the expression intensities of the metabolites across the chosen groups. This helps in comparing the differential expression of metabolites in between 2 or more groups.
+The heatmap provides the expression intensities of the metabolites across the chosen groups. This helps in comparing the differential expression of metabolites in between 2 or more groups. It uses [`d3heatmap`](https://www.rdocumentation.org/packages/d3heatmap/versions/0.6.1.1/topics/d3heatmap) function from the package d3heatmap to draw an interactive heatmap. For saving the plot, it uses [`heatmap`](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/heatmap.html).
 
-### PCA
+### Principal Component Analysis (PCA) plots
 
-These is basically ellipse plots representing the sample groups which are colored differently. Here the PLS-DA model from the package mixOmics has been used which is a supervised model.
+These is basically ellipse plots representing the sample groups which are colored differently. Here the [`PLS-DA`](http://mixomics.org/methods/pls-da/) model from the package mixOmics has been used which is a supervised model. The plotting is done with the help of the function named [`plotIndiv`](http://mixomics.org/graphics/sample-plots/plotindiv/).
 
-### Level
+### Level plots
 
-The level plot is basically similar to a heatmap but plotted on a matrix which represents the correlation between the sample groups. 
+The level plot is basically similar to a heatmap but plotted on a matrix which represents the correlation between the sample groups. It uses the function [`levelplot`](https://www.rdocumentation.org/packages/lattice/versions/0.10-10/topics/levelplot) from the package lattice. This is basically a two-dimensional view of the suface data.
 
-### RLA
+### Relative Log Abundance (RLA) plots
 
-The RLA plot produces the relative log abundance plots for both within group and across group for the metabolite data matrix.
+The RLA plot produces the relative log abundance plots for both within group and across group for the metabolite data matrix using the function [`RlaPlots`](https://rdrr.io/cran/metabolomics/src/R/RlaPlots.r).
+
+## Reports
+
+There is interesting options available to create reports in pdf/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can save the report.
+
 
 # Suggestions
 - Most of the packages will be installed automatically while running the app, if not then install them manually.
