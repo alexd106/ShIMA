@@ -62,12 +62,14 @@
                 
                 column(4,
                   shinyDirButton('directory1_1', 'Select directory', 'Please select a folder'),
+                  #textInput("directory1_1", "Choose input directory",""),
                   tags$br(),
                   tags$br(),
                   verbatimTextOutput('directorypath1_1')
                   ),
                 column(4,
                   shinyDirButton('directory1_2', 'Output directory', 'Please select a folder'),
+                  #textInput("directory1_2", "Choose output directory",""),
                   tags$br(),
                   tags$br(),
                   verbatimTextOutput('directorypath1_2'),
@@ -691,11 +693,11 @@
     shinyDirChoose(input, 'directory1_1', roots=volumes, session=session, restrictions=system.file(package='base'))
     output$directorypath1_1 <- renderText({if(is.null(input$directory1_1)){"None Selected"}else{parseDirPath(volumes, input$directory1_1)}})
     shinyDirChoose(input, 'directory1_2', roots=volumes, session=session, restrictions=system.file(package='base'))
-    output$directorypath1_2 <- renderText({if(is.null(input$directory1_2)){parseDirPath(volumes, input$directory1_1)}else{parseDirPath(volumes, input$directory1_2)}})
+    output$directorypath1_2 <- renderText({if(is.null(input$directory1_2)){"None Selected"}else{parseDirPath(volumes, input$directory1_2)}})
     shinyDirChoose(input, 'directory2_1', roots=volumes, session=session, restrictions=system.file(package='base'))
     output$directorypath2_1 <- renderText({if(is.null(input$directory2_1)){"None Selected"}else{parseDirPath(volumes, input$directory2_1)}})
     shinyDirChoose(input, 'directory2_2', roots=volumes, session=session, restrictions=system.file(package='base'))
-    output$directorypath2_2 <- renderText({if(is.null(input$directory2_2)){parseDirPath(volumes, input$directory2_1)}else{parseDirPath(volumes, input$directory2_2)}})
+    output$directorypath2_2 <- renderText({if(is.null(input$directory2_2)){"None Selected"}else{parseDirPath(volumes, input$directory2_2)}})
     shinyDirChoose(input, 'directory3_1', roots=volumes, session=session, restrictions=system.file(package='base'))
     output$directorypath3_1 <- renderText({if(is.null(input$directory3_1)){"None Selected"}else{parseDirPath(volumes, input$directory3_1)}})
     shinyDirChoose(input, 'directory3_2', roots=volumes, session=session, restrictions=system.file(package='base'))
@@ -726,6 +728,10 @@
       
       inputDir<-print({parseDirPath(volumes, input$directory1_1)})
       outputDir<-print({parseDirPath(volumes, input$directory1_2)})
+      
+      #inputDir<-print({input$directory1_1})
+      #outputDir<-print({input$directory1_2})
+      
       
       runAutopipeline(inputDir,outputDir)
       
