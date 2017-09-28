@@ -20,7 +20,7 @@ runAutopipeline <- function(inputDir, outputDir) {
   } 
   if(Sys.info()["sysname"] == "Windows"){
     xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
-                    verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = SnowParam(1))
+                    verbose.columns = TRUE, fitgauss = FALSE)
     
   } else{
     cat ("Mac implementation not available")
