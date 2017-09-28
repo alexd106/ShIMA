@@ -811,7 +811,7 @@
     
     observeEvent(input$go3, {
       
-      
+      cwd<-getwd()
       
       inFile1 <- input$file1
       if (is.null(inFile1))
@@ -837,7 +837,7 @@
       
       runAnnotation(dataA,outDir,max.mz.diff,max.rt.diff,num_nodes,queryadductlist,mode,db_name,num_sets,corthresh,status,max_isp,mass_defect_window)
       
-      cwd<-getwd()
+      
       setwd(cwd)
       shinyjs::enable("reportAnnotAnalysis")
       output$reportAnnotAnalysis <- downloadHandler(
