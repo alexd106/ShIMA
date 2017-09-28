@@ -1,4 +1,5 @@
 
+options(java.parameters = "-Xss2560k")
 
 body(multilevelannotation)[[25]][[4]][[3]][[169]][[2]] <- substitute({
   c("outloc", "adduct_weights", "boostIDs", "pathwaycheckmode", "adduct_table", 
@@ -243,7 +244,7 @@ runAnnotation <- function(dataA, outDir, max.mz.diff, max.rt.diff, num_nodes, qu
   
   
   
-  
+  setwd(outDir)
   save(db_name, outloc, annotres, file="runAnnotAnalysisRes.Rdata")
 }
 
