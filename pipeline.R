@@ -14,8 +14,19 @@ body(multilevelannotation)[[25]][[4]][[3]][[35]][[4]][[2]][[3]][[2]] <- substitu
 
 runAutopipeline <- function(inputDir, outputDir) {
   
+  if(Sys.info()["sysname"] =="Linux"){
   xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
                   verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(1))
+  } 
+  if(Sys.info()["sysname"] == "Windows"){
+    xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
+                    verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = SnowParam(1))
+    
+  } else{
+    cat ("Mac implementation not available")
+  }
+    
+  
   xsg1<-group.nearest(xsg1)
   xsg2 <- retcor(xsg1, method = "obiwarp", profStep = 0.01, center = 3)
   xsg3 <- group.nearest(xsg2)
