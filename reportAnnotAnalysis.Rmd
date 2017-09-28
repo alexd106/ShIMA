@@ -1,0 +1,32 @@
+---
+title: "Annotation Analysis Report"
+
+
+---
+<img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
+Report generated on: `r format(Sys.time(), "%c")`
+
+```{r echo = FALSE}
+load(paste0(outDir,"/runAnnotAnalysisRes/runAnnotAnalysisRes.Rdata"))
+Res <- read.csv(paste0(outloc,"/Stage5.csv"), header = T)
+```
+
+# Input summary:
+
+Input file name: `r paste(filenameMet)`
+
+# Results:
+
+The annotation of the metabolites in the Annotation tab provides 3 options for the users to choose. These are 3 widely used databases i.e. HMDB, KEGG and LipidMaps. 
+
+The annotation against `r paste(db_name)` identified `r length(Res$chemical_ID)` number of metabolites among which `r length(unique(Res$chemical_ID))` are unique. 
+
+Number of metabolites with high confidence: length(unique(Res[Res$Confidence == 3,]$chemical_ID))
+
+Number of metabolites with medium confidence: length(unique(Res[Res$Confidence == 2,]$chemical_ID))
+
+Number of metabolites with low confidence: length(unique(Res[Res$Confidence == 1,]$chemical_ID))
+
+Number of metabolites with no confidence: length(unique(Res[Res$Confidence == 0,]$chemical_ID))
+
+

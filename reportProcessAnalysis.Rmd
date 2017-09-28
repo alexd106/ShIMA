@@ -1,0 +1,50 @@
+---
+title: "Preprocessing Analysis Report"
+
+
+---
+
+<img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
+Report generated on: `r format(Sys.time(), "%c")`
+
+```{r echo = FALSE}
+load(paste0(outputDir,"/runProcessAnalysisRes/runProcessAnalysisRes.RData"))
+```
+
+# Input summary:
+
+The Preprocessing tab takes raw metabolomics data files inside directories which represents the sample groups. The summary of input data:
+
+```{r echo = FALSE}
+xsg1
+```
+
+There are `r length(unique(dataC$Group))` groups for the current input which are: 
+
+```{r echo = FALSE}
+unique(dataC$Group)
+```
+
+
+# Results:
+
+The retention time correction is one of the most important step in metabolomics for aligning the samples. Figure-1 shows the retention time correction of the input xcmsSet data.
+
+Figure-1: RT correction plot
+```{r echo = FALSE}
+retcor(xsg1, family="symmetric", plottype="mdevden")
+```
+
+The processing of all the peaks were done using RT correction followed by grouping and gap filling. The summary of the data is as follows:
+
+```{r echo = FALSE}
+summary(dat)
+```
+
+The processed data is generated after all the above mentioned steps which contains the metabolite IDs matched against the metlin database. The MyPeakTable.txt and MyExpTable.txt are the two files generated directly from xcms package which contains the mass, retention time information across all the samples. There are total of `r length(report$name)` number of metlin IDs identified. After the grouping the medians both for mass and retention times were calculated across all the metabolites. The pipeline generates few more number of files which are used as the input for the next tabs such as Annotation, StatisticalAnalysis and Visualization.
+
+
+
+
+
+
