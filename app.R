@@ -836,7 +836,7 @@
       
       
       runAnnotation(dataA,outDir,max.mz.diff,max.rt.diff,num_nodes,queryadductlist,mode,db_name,num_sets,corthresh,status,max_isp,mass_defect_window)
-      setwd(outDir)
+      
       cwd<-getwd()
       setwd(cwd)
       shinyjs::enable("reportAnnotAnalysis")

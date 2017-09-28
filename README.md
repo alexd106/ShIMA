@@ -9,16 +9,15 @@ output: html_document
 
 <Github>
 
-To run this app locally on your machine, download R or RStudio and install the following packages. While trying to run ShIMA the very first time, it will try to check and install all the packages needed for the analysis except xMSannotator. But there is a possiblity to have issues with installations. There are instrunctions below which can also be followed for simple installation of the packages needed. However, a few packages can be little tricky as all of the packages involved in this projects are not CRAN based. If any of the packages are not installed or loaded properly, there will be the basic error which can be seen in the R console and may need little troubleshooting. 
+To run this app locally on your machine, download R or RStudio and install the following packages. While trying to run ShIMA the very first time, it will try to check and install all the packages needed for the analysis except xMSannotator. But there is a possiblity to have issues with installations. There are instructions below which can also be followed for simple installation of the packages needed. However, a few packages can be little tricky as all of the packages involved in this projects are not CRAN based. If any of the packages are not installed or loaded properly, there will be the basic error which can be seen in the R console and may need little troubleshooting. 
 
 Run the following commands once to set up the environment:
 ```
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("xcms", "multtest", "mzR","AnnotationDbi", "impute", "GO.db", "preprocessCore",))
-install.packages(c("rJava", "XML", "snow", "caTools", "bitops", "ptw", "gplots", "tcltk2","WGCNA", "shiny","shinyFiles","shinyBS","BiocParallel","DT","splitstackshape","mixOmics","metabolomics","lattice","Heatplus","minet","igraph","data.table","irlba","qdap","Matrix","BiocParallel"))
+biocLite(c("xcms", "multtest", "mzR","AnnotationDbi", "impute", "GO.db", "preprocessCore","pcaMethods","Heatplus"))
+install.packages(c("rJava", "XML", "snow", "caTools", "bitops", "ptw", "gplots", "tcltk2","WGCNA", "shiny","shinyFiles","shinyBS","BiocParallel","DT","splitstackshape","mixOmics","metabolomics","lattice","minet","igraph","data.table","irlba","qdap","Matrix"))
 install.packages("snow",repos="http://cran.r-project.org")
 install.packages("doSNOW",repos="http://cran.r-project.org")
-install.packages("parallel",repos="http://cran.r-project.org")
 install.packages("e1071",repos="http://cran.r-project.org")
 install.packages("XML",repos="http://cran.r-project.org")
 install.packages("R2HTML",repos="http://cran.r-project.org")
@@ -33,38 +32,23 @@ install.packages("png",repos="http://cran.r-project.org")
 install.packages("rjson",repos="http://cran.r-project.org")
 
 
-For the installation of the package xMSannotator, you can go through the instructions below or you may want to have a look at <https://sourceforge.net/projects/xmsannotator/>. We have also kept a zip version of xMSannotator at <https://github.com/alexd106/ShIMA/tree/master/Install> installation which is highly recommended for the version control in ShIMA.
+For the installation of the package xMSannotator, you can go through the instructions below or you may want to have a look at <https://sourceforge.net/projects/xmsannotator/files/Installation_instructions_xMSannotator.txt/download>. We have also kept a zip version of xMSannotator at <https://github.com/alexd106/ShIMA/tree/master/Install> installation which is highly recommended for the version control in ShIMA.
+The example dataset can be found at <https://github.com/alexd106/ShIMA/tree/master/Examples/Examples.zip>.
 
-## installing xMSannotator
-### Installation on Windows:
-#### 1) Download the "xMSannotator_*.zip" file from the link mentioned above Rversion2.15.2 or Rversion3.0.3 depending on your R version
-#### 2) Open R
-#### 3) Click on "Packages" under the menu bar
-#### 4) Click on "Install packages from local zip files"
-#### 5) Browse to the download location of the "xMSannotator_*.zip" file
-#### 6) Double click on the file and installation should begin
-#### 7) Run "library(xMSannotator)" command from within R to make sure the package is successfully installed
-### xMSannotator installation on Mac:
-#### 1) Go to “Applications” 
-#### 2) Open R
-#### 3) Go to "Packages & Data” 
-#### 4) Select "Local Source Package" option from the drop down menu 
-#### 5) Click on "Install”
-#### 6) Browse to the download location
-#### 7) Click "Open"
-### OR:
-#### 1) Download "xMSannotator_*.tar.gz" file from the IT box under Rversion2.15.2 or Rversion3.0.3 depending on your R version
-#### 2) Go to MAC “Utilities” 
-#### 3) Click on "Terminal"
-#### 4) Browse to the download location of xMSannotator_*.tar.gz
-#### 5) Run "R CMD INSTALL xMSannotator_*.tar.gz" to install
-#### 6) Run "library(xMSannotator)" command from within R to make sure the package is successfully installed
-### xMSannotator installation on Linux:
-#### 1) Download "xMSannotator_*.tar.gz" file from the IT box under Rversion2.15.2 or Rversion3.0.3 depending on your R version
-#### 2) Browse to the download location of xMSannotator_*.tar.gz
-#### 3) Run "R CMD INSTALL xMSannotator_*.tar.gz" to install
-#### 4) Run "library(xMSannotator)" command from within R to make sure the package is successfully installed
-```
+The installation procedures are little different in case of different operating systems. 
+
+On Windows:
+
+In the R console, go to the option "Install packages from local zip files" under the "Packages" menu. Then browse the zip installation file which has been downloaded from Github and run.
+
+On Mac:
+
+In mac, open R and  under the "Packages & Data" there is "Local Source Package" which can be used to install with browsing the tar.gz installation file using the option "Install".
+
+On Linux:
+
+Linux also accepts the tar.gz installation file. It can be done by simply going to the directory which contains the installation file and then running "R CMD INSTALL xMSannotator_*.tar.gz" to install.
+
 
 You may now run the shiny app with just one command in R:
 

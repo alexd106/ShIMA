@@ -6,12 +6,14 @@ output: html_document
 
 This tutorial contains the test raw metabolomics data in the .mzXML formats. The .mzXML format is the most common raw formats for LCMS data.  The format is very much similar to the basic XML format. It contains various meta-data tags such as "msRun", "parentFile", "msManufacturer", etc. and the real data inside the tag "can" such as "num", "scanType", "peaksCount", "polarity", "retentionTime", "lowMz", "highMz", etc. These are the input for "Autopipeline" and the "Preprocessing" tab but for all other tabs, the input is text files separated by comma/tab.
 
+Useers can download the example datasets in the Examples directory under the ShIMA at Github (https://github.com/alexd106/ShIMA/tree/master/Examples/Examples.zip). Download the Examples.zip file and extract it in your local system.
+
 ## Autopipeline
 
 
 ### Input
 
-We have grouped the .mzXML files into "blank", "QC", "sample1", "sample2" and "sample3" and put them inside directories with the respective names (Fig-1a). Each of the directories contains 4 .mzXML files.
+The .mzXML files have been grouped into "blank", "QC", "sample1", "sample2" and "sample3" and put inside directories with the respective names (Fig-1a). Each of the directories contains 4 .mzXML files.
 
 <img src="AutopipelineInpt.png" alt="Aotopipeline Input" style="width: 60%"/>
 
