@@ -1,0 +1,105 @@
+---
+title: "Differential Analysis Report"
+
+
+
+---
+<img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
+Report generated on: `r format(Sys.time(), "%c")`
+
+```{r echo = FALSE}
+load(paste0(outputDir,"/runDiffAnalysisRes/runDiffAnalysisRes.Rdata"))
+```
+
+# Input summary:
+
+Input file name: `r paste(filenameMet)`
+
+Number of Metabolites: `r dim(met)[2]-1`
+
+Number of Samples: `r dim(met)[1]`
+
+Number of Groups: `r length(unique(met$Group))`
+
+Name of the Groups: `r unique(met$Group)`
+
+
+Groups selected for comparision:
+
+`r paste(grp4comp)`
+
+# Quality control
+
+The metabolite intensities were normalized across all the sample groups which were saved to file named: `r paste0("norm_", file2name, ".csv")`. Below in the Figure-1, there are 2 boxplots a. boxplot for the raw intensities of metabolites across all the individual samples and b. the normalised intensities of the same metabolites across all the individual samples.
+
+
+```{r echo = FALSE, out.width = "300px"}
+boxplot(Tmet.1, las=2, ylab="Raw intensities of Metabolites", col="grey", pars=list(par(mar=c(16,5,0,2))), cex.axis=0.75, outline=FALSE)
+mtext("Samples", side = 1, line = 7)
+mtext("Figure-1a: sample boxplot for raw intensities", side = 1, line = 10)
+```
+
+
+```{r echo = FALSE, out.width = "300px"}
+boxplot(Tnorm.samp, las=2, ylab="Normalized intensities of Metabolites", col="grey", pars=list(par(mar=c(15,5,0,2))), cex.axis=0.75, outline=FALSE)
+mtext("Samples", side = 1, line = 7)
+mtext("Figure-1b: sample boxplot for normalized intensities", side = 1, line = 10)
+```
+
+# Results:
+
+A contrast matrix was created based upon the groups that were selected for the comparision:-
+
+```{r echo = FALSE}
+contrast.mat
+```
+
+Further, the LinearModelFit function from the package metabolomics was used on each metabolite in a metabolomics data matrix to remove unwanted variation, and compute t-statistics, F-statistic, and corresponding p-values. The result was stored in 2 different csv files, one containing table of significant results based on F statistic and another for all the test statistic, pvalues for each contrast. 
+
+The results of F-statistics can be found in the file named `r paste0("Fstats_", file2name, ".csv")`. The Venn diagram was plotted for the count of the differential expressed metabolites for all the comparision groups selected (Figure-2). A total of `r length(colnames(results))` comparision groups were selected which can be seen as the labels of the sets in the Venn diagram. The number of metabolites found differentially expressed either of the selected contrast groups are `r length(rownames(results))-vennCounts(results)[(length(colnames(results))*length(rownames(vennCounts(results))))+1]`.
+
+
+```{r echo = FALSE, results='asis'}
+vennDiagram(results, circle.col="blue")
+mtext("Figure-2: Venn Diagram for the differentially expressed metabolites", side = 3, line = 0)
+cat("\n\n\\pagebreak\n")
+for(i in 1:length(results_F[2:which(names(results_F) %in% "AveExpr")])){
+plotMA(mod2, i)
+}
+
+```
+
+There is another file named as `r paste0("AllStats_", file2name, ".csv")` for all test statistics table. This will provide the average log-intensity fold changes of between each contrasts selected, P-values for both t-statistic and F-statistic.
+
+
+```{r echo = FALSE}
+for(i in 1:length(results_F[2:which(names(results_F) %in% "AveExpr")])){
+volcanoplot(mod2, coef=i, style = "p-value", highlight = 10, names = mod2$genes$metabolites)
+}
+
+
+#volcanoplot(mod2, coef=1, style = "p-value", highlight = 0, names = mod2$genes$metabolites, pch=20, col = ifelse( mod2$p.value[,coef=1] < 0.05 | mod2$p.value[,coef=1] > 0.05, "red", "green"))
+```
+
+
+Either of F statistics and All statistics or both of them can be taken into consideration to screen the differentially expressed metabolites.
+
+Volcano plots:
+
+```{r echo = FALSE}
+d2<-results_F
+for(i in 1:length(d2[2:which(names(d2) %in% "AveExpr")])){
+
+    d2$temp<-d2[,i]
+    with(d2, plot(temp, -log10(P.Value), pch=20, main=paste("Volcano plot (",colnames(d2)[i],")"), xlim=c(-2.5,2), xlab="Fold Change"))
+    
+    # Add colored points: red if padj<0.05, orange of log2FC>1, green if both)
+    with(subset(d2, adj.P.Val<.05 ), points(temp, -log10(P.Value), pch=20, col="red"))
+    with(subset(d2, abs(temp)>1), points(temp, -log10(P.Value), pch=20, col="orange"))
+    with(subset(d2, adj.P.Val<.05 & abs(temp)>1), points(temp, -log10(P.Value), pch=20, col="green"))
+    
+    # Label points with the textxy function from the calibrate plot
+    with(subset(d2, adj.P.Val<.05 & abs(temp)>1), textxy(temp, -log10(P.Value), labs=rownames(d2), cex=.6))
+    
+}
+```

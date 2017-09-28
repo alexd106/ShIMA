@@ -674,8 +674,8 @@
   
   server <- function(input, output, session) {
     #volumes <- c('R Installation'=R.home())
-    volumes <- c("UserFolder"="/home/s03js6/JeeTzzz")
-    #volumes <- getVolumes()
+    #volumes <- c("UserFolder"="/home/s03js6/JeeTzzz")
+    volumes <- getVolumes()
     
     shinyjs::disable("reportAutopipelineAnalysis")
     shinyjs::disable("reportProcessAnalysis")
@@ -810,14 +810,14 @@
     
     
     observeEvent(input$go3, {
-      cwd<-getwd()
+      
       
       
       inFile1 <- input$file1
       if (is.null(inFile1))
         return(NULL)
       dataA<-read.table(inFile1$datapath, header=input$header, sep=input$sep)
-      
+      filenameMet <- inFile1$name
       max.mz.diff=input$max.mz.diff
       max.rt.diff=input$max.rt.diff
       
@@ -836,7 +836,8 @@
       
       
       runAnnotation(dataA,outDir,max.mz.diff,max.rt.diff,num_nodes,queryadductlist,mode,db_name,num_sets,corthresh,status,max_isp,mass_defect_window)
-      
+      setwd(outDir)
+      cwd<-getwd()
       setwd(cwd)
       shinyjs::enable("reportAnnotAnalysis")
       output$reportAnnotAnalysis <- downloadHandler(
@@ -1005,7 +1006,7 @@
         setwd(outputDir)
         dir.create("runCMIanalysisRes")
         setwd("runCMIanalysisRes")
-        runCMI(GrpMetMZ, irlba = FALSE, graphML = graphML, stats = stats, prefix = "CMI_stats")
+        runCMI(GrpMetMZ, irlba = FALSE, graphML = graphML, stats = stats, prefix = file3name)
         setwd(outputDir)
         
         setwd(cwd)

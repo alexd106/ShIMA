@@ -1,13 +1,50 @@
 ---
-title: "Network Analysis Report"
+title: "Annotatio Analysis Report"
 
 
 ---
 <img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
 Report generated on: `r format(Sys.time(), "%c")`
 
+```{r echo = FALSE}
+load(paste0(outputDir,"/runCMIanalysisRes/runNetwrkAnalysisRes.Rdata"))
+```
 
 # Input summary:
+
 Input file name: `r paste(filenameMet)`
 
+Number of Metabolites: `r dim(metMZ)[2]-1`
+
+Number of Samples: `r dim(metMZ)[1]`
+
+Number of Groups: `r length(unique(metMZ$Group))`
+
+Name of the Groups: `r unique(metMZ$Group)`
+
+Groups selected for subsetting the input file: `r paste(Grp)`
+
 # Results:
+
+At first the minet package created an adjacency matrix by calculating the mutual information among all possible pairs of metabolites. There were `r dim(metMZ)[2]-1` metabolites in total, so they formed a `r dim(metMZ.mi)[1]` x `r dim(metMZ.mi)[2]` matrix. The adjacency matrix file was stored as `r paste0(prefix, "_mi.csv")`
+Below is a heatmap plotted for the adjacency matrix (Figure-1).
+
+```{r echo = FALSE}
+heatmap(metMZ.mi)
+mtext("Figure-1: Heatmap for the mutual information adjacency matrix", side = 1, line = 0)
+```
+
+The adjacency matrix was converted into an igraph network object which was stored as a graphml file named `r paste(prefix, "_", "metMZmi", "_net.graphML", sep = "")`. The network statistics information were stored into 2 files which are `r paste(prefix, "_", "metMZmi", "_NetInfo.txt", sep = "")` and `r paste(prefix, "_", "metMZmi", "_NetStats.txt", sep = "")`.
+
+The network can be uploaded using tools such as Gephi by uploading the `r paste(prefix, "_", "metMZmi", "_net.graphML", sep = "")` file. Below in Figure-2 basic visualization of the network has been represented.
+
+```{r echo = FALSE}
+plot(AI.graph, vertex.label.dist=0.5)
+mtext("Figure-2: CMI network visualization", side = 1, line = 0)
+```
+
+The `r paste(prefix, "_", "metMZmi", "_NetInfo.txt", sep = "")` file contains the information regarding the number of nodes and the modularity coefficient which are `r num.nodes` and `r Q` respectively. The `r paste(prefix, "_", "metMZmi", "_NetStats.txt", sep = "")`file contains a text file with all the IDs of the metabolites, the cluster number, node strength, eigen centrality and node degree.
+
+
+
+

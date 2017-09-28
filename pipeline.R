@@ -15,9 +15,9 @@ runAutopipeline <- function(inputDir, outputDir) {
   
   xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = 5, peakwidth = c(10, 100), snthresh = 5, prefilter = c(3, 1000), integrate = 1, mzdiff = 0.01, 
                   verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(10))
-  
+  xsg1<-group.nearest(xsg1)
   xsg2 <- retcor(xsg1, method = "obiwarp", profStep = 0.01, center = 3)
-  xsg3 <- group(xsg2)
+  xsg3 <- group.nearest(xsg2)
   xsg4 <- fillPeaks(xsg3)
   dat <- groupval(xsg4, "medret", "into")
   
@@ -26,8 +26,8 @@ runAutopipeline <- function(inputDir, outputDir) {
   report <- diffreport(xsg4, metlin = 0.15, h = 480, w = 640)
   
   setwd(outputDir)
-  dir.create("AutopipelineOutput")
-  outputDir<-paste0(outputDir,"/AutopipelineOutput")
+  dir.create("runAutopipelineRes")
+  outputDir<-paste0(outputDir,"/runAutopipelineRes")
   setwd(outputDir)
   write.table(dat, file = "MyPeakTable.txt", sep = "\t")
   write.table(report, file = "MyExpTable.txt", sep = "\t")
@@ -153,7 +153,7 @@ runAutopipeline <- function(inputDir, outputDir) {
   write.csv(MetlinRes_hmdb_kegg_LipidMaps3, file = "AllMergdRes.csv", row.names=F)
   ###### 
   
-  
+  save(xsg1, dat,report,dataB, dataC, dataA, hmdbRes, keggRes, LipidMapsRes, MetlinRes_hmdb_kegg_LipidMaps3, file="runAutopipelineRes.RData")
 }
 
 
@@ -161,16 +161,16 @@ runPreprocess <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,in
   
   xsg1 <- xcmsSet(files = inputDir, method = "centWave", ppm = as.numeric(ppm), peakwidth = peakwidth, snthresh = as.numeric(snthresh), prefilter = prefilter, integrate = as.numeric(integrate), mzdiff = as.numeric(mzdiff), 
                   verbose.columns = TRUE, fitgauss = FALSE, BPPARAM = MulticoreParam(as.numeric(nSlaves)))
-  
+  xsg1<-group.nearest(xsg1)
   xsg2 <- retcor(xsg1, method = retcorMethod, profStep = as.numeric(profStep), center = as.numeric(center))
-  xsg3 <- group(xsg2)
+  xsg3 <- group.nearest(xsg2)
   xsg4 <- fillPeaks(xsg3)
   dat <- groupval(xsg4, "medret", "into")
   dat <- rbind(group = as.character(phenoData(xsg4)$class), dat)
   report <- diffreport(xsg4, metlin = 0.15, h = 480, w = 640)
   setwd(outputDir)
-  dir.create("PreprocessingOutput")
-  outputDir<-paste0(outputDir,"/PreprocessingOutput")
+  dir.create("runProcessAnalysisRes")
+  outputDir<-paste0(outputDir,"/runProcessAnalysisRes")
   setwd(outputDir)
   write.table(dat, file = "MyPeakTable.txt", sep = "\t")
   write.table(report, file = "MyExpTable.txt", sep = "\t")
@@ -193,7 +193,7 @@ runPreprocess <- function(inputDir,outputDir,ppm,peakwidth,snthresh,prefilter,in
   dataA <- dataB[,-which(names(dataB) %in% "Metlin_ID")]
   write.csv(dataA, file = "AnnotationInpt.csv", row.names=F)
   
-  
+  save(xsg1, dat,report,dataB, dataC, dataA, file="runProcessAnalysisRes.RData")
 }
 
 
@@ -213,8 +213,8 @@ runAnnotation <- function(dataA, outDir, max.mz.diff, max.rt.diff, num_nodes, qu
   print(format(Sys.time(), "%a %b %d %X %Y"))
   
   setwd(outDir)
-  dir.create("AnnotationOutput")
-  outputDir<-paste0(outDir,"/AnnotationOutput")
+  dir.create("runAnnotAnalysisRes")
+  outputDir<-paste0(outDir,"/runAnnotAnalysisRes")
   setwd(outputDir)
   
   if (db_name == "HMDB") {
@@ -242,6 +242,9 @@ runAnnotation <- function(dataA, outDir, max.mz.diff, max.rt.diff, num_nodes, qu
                                                pathwaycheckmode = "pm", mass_defect_mode = "pos"))
   
   
+  
+  
+  save(db_name, outloc, annotres, file="runAnnotAnalysisRes.Rdata")
 }
 
 runDiffAnalysis <- function(met, grp4comp, FparamName, FparamValue, AllPvalue, AllFCvalue, file2name) {
@@ -386,16 +389,16 @@ runDiffAnalysis <- function(met, grp4comp, FparamName, FparamValue, AllPvalue, A
   
 }
 
-runCMI <- function(GrpMetMZ, irlba = FALSE, graphML, stats, prefix = "CMI_stats") {
+runCMI <- function(GrpMetMZ, irlba = FALSE, graphML, stats, prefix = file3name) {
   
   
   GrpMetMZ[GrpMetMZ == 0] <- 0.0001
   GrpMetMZ[GrpMetMZ == Inf] <- 0.0001
   
                            
-  metMZ.mi <- minet(GrpMetMZ[, 3:length(GrpMetMZ)], method = "aracne", estimator = "mi.mm", 
+  metMZ.mi <- minet(GrpMetMZ[, 2:length(GrpMetMZ)], method = "aracne", estimator = "mi.mm", 
                     disc = "equalwidth")
-  write.csv(metMZ.mi, file = "metMZmi.csv")
+  write.csv(metMZ.mi, file = paste0(prefix, "_mi.csv"))
   AI <- metMZ.mi
   rownames(AI) <- colnames(AI)
   feature.names <- rownames(AI)
@@ -533,7 +536,7 @@ runCMI <- function(GrpMetMZ, irlba = FALSE, graphML, stats, prefix = "CMI_stats"
   
   
   
-  
+  save(prefix, AI.graph, metMZ.mi, netStats, num.nodes, Q, file="runNetwrkAnalysisRes.Rdata")
   
  
   # write to graphML file

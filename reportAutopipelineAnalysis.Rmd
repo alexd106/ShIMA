@@ -7,12 +7,72 @@ title: "Autopipeline Analysis Report"
 <img src="ShIMA.png" alt="ShIMA logo" style="width: 60%"/>
 Report generated on: `r format(Sys.time(), "%c")`
 
+```{r echo = FALSE}
+load(paste0(outputDir,"/runAutopipelineRes/runAutopipelineRes.RData"))
+```
 
 # Input summary:
+
+The Autopipeline takes raw metabolomics data files inside directories which represents the sample groups. The summary of input data:
+
 ```{r echo = FALSE}
-
-
+xsg1
 ```
+
+There are `r length(unique(dataC$Group))` groups for the current input which are: 
+
+```{r echo = FALSE}
+unique(dataC$Group)
+```
+
 
 # Results:
 
+The retention time correction is one of the most important step in metabolomics for aligning the samples. Figure-1 shows the retention time correction of the input xcmsSet data.
+
+Figure-1: RT correction plot
+```{r echo = FALSE}
+retcor(xsg1, family="symmetric", plottype="mdevden")
+```
+
+The processing of all the peaks were done using RT correction followed by grouping and gap filling. The summary of the data is as follows:
+
+```{r echo = FALSE}
+summary(dat)
+```
+
+The processed data is generated after all the above mentioned steps which contains the metabolite IDs matched against the metlin database. The MyPeakTable.txt and MyExpTable.txt are the two files generated directly from xcms package which contains the mass, retention time information across all the samples. There are total of `r length(report$name)` number of metlin IDs identified. After the grouping the medians both for mass and retention times were calculated across all the metabolites. The pipeline generates few more number of files which are used as the input for the next tabs such as Annotation, StatisticalAnalysis and Visualization.
+
+Once the processing steps are finished, the Autopipeline goes for the annotation of the metabolites using three widely used databases which are HMDB, KEGG and LipidMaps.
+
+- The annotation against HMDB identified `r length(hmdbRes$chemical_ID)` number of metabolites among which `r length(unique(hmdbRes$chemical_ID))` are unique. 
+
+Number of metabolites with high confidence: length(unique(hmdbRes[hmdbRes$Confidence == 3,]$chemical_ID))
+
+Number of metabolites with medium confidence: length(unique(hmdbRes[hmdbRes$Confidence == 2,]$chemical_ID))
+
+Number of metabolites with low confidence: length(unique(hmdbRes[hmdbRes$Confidence == 1,]$chemical_ID))
+
+Number of metabolites with no confidence: length(unique(hmdbRes[hmdbRes$Confidence == 0,]$chemical_ID))
+
+- The annotation against KEGG identified `r length(keggRes$chemical_ID)` number of metabolites among which `r length(unique(keggRes$chemical_ID))` are unique. 
+
+Number of metabolites with high confidence: length(unique(keggRes[keggRes$Confidence == 3,]$chemical_ID))
+
+Number of metabolites with medium confidence: length(unique(keggRes[keggRes$Confidence == 2,]$chemical_ID))
+
+Number of metabolites with low confidence: length(unique(keggRes[keggRes$Confidence == 1,]$chemical_ID))
+
+Number of metabolites with no confidence: length(unique(keggRes[keggRes$Confidence == 0,]$chemical_ID))
+
+- The annotation against LipidMaps identified `r length(LipidMapsRes$chemical_ID)` number of metabolites among which `r length(unique(LipidMapsRes$chemical_ID))` are unique. 
+
+Number of metabolites with high confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 3,]$chemical_ID))
+
+Number of metabolites with medium confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 2,]$chemical_ID))
+
+Number of metabolites with low confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 1,]$chemical_ID))
+
+Number of metabolites with no confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 0,]$chemical_ID))
+
+The results was merged into a file named "AllMergdRes.csv" which contains the annotation against 4 databases which are Metlin, HMDB, KEGG and LipidMaps.
