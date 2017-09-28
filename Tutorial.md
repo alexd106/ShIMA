@@ -13,7 +13,7 @@ This tutorial contains the test raw metabolomics data in the .mzXML formats. The
 
 We have grouped the .mzXML files into "blank", "QC", "sample1", "sample2" and "sample3" and put them inside directories with the respective names (Fig-1a). Each of the directories contains 4 .mzXML files.
 
-<img src="AutopipelineInpt.png" alt="Aotopipeline Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/AutopipelineInpt.png" alt="Aotopipeline Input" style="width: 60%"/>
 
 Fig-1a: Input for the Autopipeline tab
 
@@ -25,7 +25,7 @@ The Autopipeline results with the following files:-
 
 The peak table is a direct output of the package XCMS which basically provides the grouped and preprocessed peak intensities with the file name and the group they belong as the column names (Fig-1b). The mz/RT  can be found in the first column of the file under the column name "group". 
 
-<img src="AutopipelinePeak.png" alt="Aotopipeline Output Peak" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/AutopipelinePeak.png" alt="Aotopipeline Output Peak" style="width: 60%"/>
 
 Fig-1b: Peak table from the Autopipeline tab output
 
@@ -33,7 +33,7 @@ Fig-1b: Peak table from the Autopipeline tab output
 
 The report table is also a direct output of the package XCMS (Fig-1c). This acyually represents a differential report with fold change and p value and Metlin identification. ShIMA only consider the Metlin IDs as it provides the differential analysis in the StatisticalAnalysis tab.
 
-<img src="AutopipelineReport.png" alt="Aotopipeline Output Report" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/AutopipelineReport.png" alt="Aotopipeline Output Report" style="width: 60%"/>
 
 Fig-1c: Report table from the Autopipeline tab output
 
@@ -41,7 +41,7 @@ Fig-1c: Report table from the Autopipeline tab output
 
 This provides the identification of metabolite IDs in the metlin database provided by XCMS (Fig-1d). The file contains the mass charge ratio and retention time along with their respective matches in the metlin database.
 
-<img src="MetlinRes.png" alt="Metlin Identification" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/MetlinRes.png" alt="Metlin Identification" style="width: 60%"/>
 
 Fig-1d: Metlin identification table
 
@@ -57,7 +57,7 @@ The Autopipeline also uses xMSannotator followed by XCMS to search against the d
 
 For a better idea about of the metabolites identified, the output contains 2 files with merged results which merges all the outputs based on the metabolite names (Fig-1e). 
 
-<img src="MergedRes.png" alt="Merged table" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/MergedRes.png" alt="Merged table" style="width: 60%"/>
 
 Fig-1e: Merged result table
 
@@ -81,7 +81,7 @@ The Annotation tabs performs the identification of the metabolites by matching t
 
 The users can use the file generated from the Preprocessing or a file with similar structure which contains the first 2 columns as the mz and RT and then individual intensities accross the samples (Fig-3a). The "Parameters" panel can be used to modify the parameters as discussed in the Documentation which greatly influence the identification process.
 
-<img src="AnnotationInpt.png" alt="Annotation Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/AnnotationInpt.png" alt="Annotation Input" style="width: 60%"/>
 
 Fig-3a: Input for the Annotation tab
 
@@ -102,7 +102,7 @@ The users should choose one of the option between "Reference" or "Groups" to fin
 
 Similarly, in case of Network Analysis, the users can select groups for subsetting from the parent input files. The users can also select checkboxes to allow the network statistics and graphml file to be included in the output.
 
-<img src="StatisticalAnalysisInpt.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/StatisticalAnalysisInpt.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 
 Fig-4a: Input for the StatisticalAnalysis tab
 
@@ -123,19 +123,19 @@ contains "ID", "cluster", "NodeStrength", "EigenCentrality" and "NodeDegree" for
 
 This tab allows the users to use the same input as that of the StatisticalAnalysis tab or log transformed intensities of the metabolites to visualize the data using plots such as Heatmap, PCA plot, Level plot and RLA plot (Fig-5).
 
-<img src="heatmap.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/heatmap.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 
 Fig-5a: Heatmap
 
-<img src="pca.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/pca.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 
 Fig-5b: PCA plot
 
-<img src="levelplot.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/levelplot.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 
 Fig-5c: Level plot
 
-<img src="rla.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/tree/master/www/rla.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 
 Fig-5d: RLA plot
 
