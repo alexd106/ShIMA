@@ -131,8 +131,8 @@ This tab allows the users to use the output generated from the Autopipeline as t
 
 - In case of input for the PCA and Level plots, the file contains the individual sample names as the first column considered as the row names and the sample groups in the second column. The all other column names must be metabolite iDs or names and the records are intensities of individual metabolites.
 
+![StatisticalAnalysis Input](https://github.com/alexd106/ShIMA/blob/master/www/heatmap.png)
 
-<img src="https://github.com/alexd106/ShIMA/blob/master/www/heatmap.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 
 Fig-5a: Heatmap
 
