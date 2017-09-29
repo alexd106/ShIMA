@@ -119,3 +119,7 @@ if (!require(Matrix)) {
   install.packages("Matrix", dep = TRUE, quiet = TRUE)
   library(Matrix, quietly = TRUE)
 }
+if (!require(RANN)) {
+  install.packages("RANN", dep = TRUE, quiet = TRUE)
+  library(RANN, quietly = TRUE)
+}

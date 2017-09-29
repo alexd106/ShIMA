@@ -14,8 +14,11 @@ To run this app locally on your machine, download R or RStudio and install the f
 Run the following commands once to set up the environment:
 ```
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("xcms", "multtest", "mzR","AnnotationDbi", "impute", "GO.db", "preprocessCore","pcaMethods","Heatplus"))
-install.packages(c("rJava", "XML", "snow", "caTools", "bitops", "ptw", "gplots", "tcltk2","WGCNA", "shiny","shinyFiles","shinyBS","BiocParallel","DT","splitstackshape","mixOmics","metabolomics","lattice","minet","igraph","data.table","irlba","qdap","Matrix"))
+biocLite(c("xcms", "multtest", "mzR","AnnotationDbi", "impute", "GO.db", "preprocessCore",
+           "pcaMethods","Heatplus"))
+install.packages(c("rJava", "XML", "snow", "caTools", "bitops", "ptw", "gplots", "tcltk2","WGCNA", 
+                   "shiny","shinyFiles","shinyBS","BiocParallel","DT","splitstackshape","mixOmics",
+                   "metabolomics","lattice","minet","igraph","data.table","irlba","qdap","Matrix"))
 install.packages("snow",repos="http://cran.r-project.org")
 install.packages("doSNOW",repos="http://cran.r-project.org")
 install.packages("e1071",repos="http://cran.r-project.org")
@@ -30,24 +33,32 @@ install.packages("flashClust",repos="http://cran.r-project.org")
 install.packages("plyr",repos="http://cran.r-project.org")
 install.packages("png",repos="http://cran.r-project.org")
 install.packages("rjson",repos="http://cran.r-project.org")
+install.packages("RANN",repos="http://cran.r-project.org")
 
 
-For the installation of the package xMSannotator, you can go through the instructions below or you may want to have a look at <https://sourceforge.net/projects/xmsannotator/files/Installation_instructions_xMSannotator.txt/download>. We have also kept a zip version of xMSannotator at <https://github.com/alexd106/ShIMA/tree/master/Install> installation which is highly recommended for the version control in ShIMA.
+For the installation of the package xMSannotator, you can go through the instructions below or you 
+may want to have a look at 
+<https://sourceforge.net/projects/xmsannotator/files/Installation_instructions_xMSannotator.txt/download>. 
+We have also kept a zip version of xMSannotator at <https://github.com/alexd106/ShIMA/tree/master/Install> 
+installation which is highly recommended for the version control in ShIMA.
 The example dataset can be found at <https://github.com/alexd106/ShIMA/tree/master/Examples/Examples.zip>.
 
 The installation procedures are little different in case of different operating systems. 
 
 On Windows:
 
-In the R console, go to the option "Install packages from local zip files" under the "Packages" menu. Then browse the zip installation file which has been downloaded from Github and run.
+In the R console, go to the option "Install packages from local zip files" under the "Packages" menu. 
+Then browse the zip installation file which has been downloaded from Github and run.
 
 On Mac:
 
-In mac, open R and  under the "Packages & Data" there is "Local Source Package" which can be used to install with browsing the tar.gz installation file using the option "Install".
+In mac, open R and  under the "Packages & Data" there is "Local Source Package" which can be used 
+to install with browsing the tar.gz installation file using the option "Install".
 
 On Linux:
 
-Linux also accepts the tar.gz installation file. It can be done by simply going to the directory which contains the installation file and then running "R CMD INSTALL xMSannotator_*.tar.gz" to install.
+Linux also accepts the tar.gz installation file. It can be done by simply going to the directory 
+which contains the installation file and then running "R CMD INSTALL xMSannotator_*.tar.gz" to install.
 
 
 You may now run the shiny app with just one command in R:
@@ -61,7 +72,8 @@ We would appreciate reports of any issues with the app via the issues option of
 
 # Instructions
 
-Instructions can be found here: <https://github.com/alexd106/ShIMA/blob/master/Documentation.md> and run through example data can be found here: <https://github.com/alexd106/ShIMA/blob/master/Tutorial.md>
+Instructions can be found here: <https://github.com/alexd106/ShIMA/blob/master/Documentation.md> and 
+run through example data can be found here: <https://github.com/alexd106/ShIMA/blob/master/Tutorial.md>
 
 # Licensing
 
@@ -83,7 +95,9 @@ information.
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>. Please also acknoledge the Office of Naval Research (ONR) and University of Aberdeen if you are using this pipeline.
+    along with this program.  If not, see <http://www.gnu.org/licenses/>. 
+    Please also acknoledge the Office of Naval Research (ONR) and 
+    University of Aberdeen if you are using this pipeline.
 
     You may contact the author of this code, --------------, at <--------------->
     

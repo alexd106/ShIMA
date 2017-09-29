@@ -4,7 +4,7 @@ runtime: shiny
 output: html_document
 ---
 
-This is an R Markdown document to provide a overview of the Metabolomics pipeline and how it works.  
+This is an R Markdown document to provide a overview of the Metabolomics pipeline and how it works. As this pipeline deals mainly with high-throughput data, it is recommended to use a high configuration system. It runs perfectly on Linux and may have a few troubleshoot for the Windows. Though the pipeline looks similar to a web-based tool but all the processing are actually done in R on the local machine. The logs, warnings and errors can be checked on the R console while ShIMA is running. ShIMA has been tested well with R version between 3.3.0 to 3.4.0. 
 
 # Introduction
 The "Shiny Interface for Metabolite Analysis" (ShIMA) is developed in Shiny graphical user interface (GUI) environment using R. The basic idea is to provide a platform where the users can easily analyse the metabolomics datasets to identify and annotate metabolites. There is also provision for a few basic downstream analyses. The pipeline runs mainly on widely used packages such as XCMS, xMSannotator and metabolomics to perform the analysis. In-house scripts were written for automating and linking the individual analysis. The users do not need to be experts in programming in R.
@@ -135,7 +135,7 @@ The RLA plot produces the relative log abundance plots for both within group and
 
 ## Reports
 
-There is interesting options available to create reports in pdf/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can save the report.
+There is interesting options available to create reports in pdf/html/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can click it to generate and save the report. In case of windows system, the pdf and html format may not render properly, so it is suggested to use doc reports instead.
 
 
 # Suggestions

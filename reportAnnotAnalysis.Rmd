@@ -21,12 +21,12 @@ The annotation of the metabolites in the Annotation tab provides 3 options for t
 
 The annotation against `r paste(db_name)` identified `r length(Res$chemical_ID)` number of metabolites among which `r length(unique(Res$chemical_ID))` are unique. 
 
-Number of metabolites with high confidence: length(unique(Res[Res$Confidence == 3,]$chemical_ID))
+Number of metabolites with high confidence: `r length(unique(Res[Res$Confidence == 3,]$chemical_ID))`
 
-Number of metabolites with medium confidence: length(unique(Res[Res$Confidence == 2,]$chemical_ID))
+Number of metabolites with medium confidence: `r length(unique(Res[Res$Confidence == 2,]$chemical_ID))`
 
-Number of metabolites with low confidence: length(unique(Res[Res$Confidence == 1,]$chemical_ID))
+Number of metabolites with low confidence: `r length(unique(Res[Res$Confidence == 1,]$chemical_ID))`
 
-Number of metabolites with no confidence: length(unique(Res[Res$Confidence == 0,]$chemical_ID))
+Number of metabolites with no confidence: `r length(unique(Res[Res$Confidence == 0,]$chemical_ID))`
 
 

@@ -1091,7 +1091,7 @@
           inFile4_2 <- input$file4_2
           if (is.null(inFile4_2))
             return(NULL)
-          met.log<-read.table(inFile4_2$datapath, header=input$header, sep=input$sep3_2)
+          met.log<-read.table(inFile4_2$datapath, header=input$header, sep=input$sep3_2, row.names = 1)
           file4_2name <- print(gsub(".txt|.csv", "",inFile4_2$name))
           
           Group <- met.log$Group
@@ -1139,7 +1139,7 @@
           inFile4_3 <- input$file4_3
           if (is.null(inFile4_3))
             return(NULL)
-          met.log<-read.table(inFile4_3$datapath, header=input$header, sep=input$sep3_3)
+          met.log<-read.table(inFile4_3$datapath, header=input$header, sep=input$sep3_3, row.names = 1)
           file4_3name <- print(gsub(".txt|.csv", "",inFile4_3$name))
           
           

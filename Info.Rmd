@@ -1,0 +1,20 @@
+This file contains meta information regarding scripts and files in ShIMA.
+
+- The Examples directory contains input for all the tabs in ShIMA and the Examples.zip is the compressed version of it.
+
+- The directory Install contains the compressed version of installation files of xMSannotator package.
+
+- The directory www contains all the images used on the interface and documentations of ShIMA.
+
+- app.R is the main script file for the shiny interface. The ui and server scripts have been kept in this single file. 
+
+- support.R contains the script for checking and automatically installing the packages needed (mainly the CRAN packages). This also loads all the libraries once app.R is run.
+
+- pipeline.R is the file which contains all the functions that process the underlying work when the interface is used.
+
+- The ShortDesc.Rmd is a short description of ShIMA which can be seen on the home page of ShIMA.
+
+- The documentation for ShIMA can be found in 3 files. The README.md contains  the basic introduction to ShIMA and how to run it. This is a Github-friendly file. THe Documentation.Rmd describes about the pipeline extensively whereas the Tutorial.Rmd is a walk through using the test example dataset. There are 2 other files which are the simple markdown version of the Documentation and Tutorial with .md extensions just to be more flexible on Github.
+
+- There are 5 .Rmd files for creating the reports for 5 tabs/panels. 
+

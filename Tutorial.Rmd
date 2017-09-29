@@ -4,16 +4,16 @@ runtime: shiny
 output: html_document
 ---
 
-This tutorial contains the test raw metabolomics data in the .mzXML formats. The .mzXML format is the most common raw formats for LCMS data.  The format is very much similar to the basic XML format. It contains various meta-data tags such as "msRun", "parentFile", "msManufacturer", etc. and the real data inside the tag "can" such as "num", "scanType", "peaksCount", "polarity", "retentionTime", "lowMz", "highMz", etc. These are the input for "Autopipeline" and the "Preprocessing" tab but for all other tabs, the input is text files separated by comma/tab.
+This tutorial contains the test example datasets on Github (https://github.com/alexd106/ShIMA/tree/master/Examples). The raw metabolomics data in the .mzXML formats. The .mzXML format is the most common raw formats for LCMS data.  The format is very much similar to the basic XML format. It contains various meta-data tags such as "msRun", "parentFile", "msManufacturer", etc. and the real data inside the tag "can" such as "num", "scanType", "peaksCount", "polarity", "retentionTime", "lowMz", "highMz", etc. These are the input for "Autopipeline" and the "Preprocessing" tab but for all other tabs, the input is text files separated by comma/tab.
 
-Useers can download the example datasets in the Examples directory under the ShIMA at Github (https://github.com/alexd106/ShIMA/tree/master/Examples/Examples.zip). Download the Examples.zip file and extract it in your local system.
+Users can download the example datasets in the Examples directory under the ShIMA at Github (https://github.com/alexd106/ShIMA/blob/master/Examples.zip). Download the Examples.zip file and extract it in your local system.
 
 ## Autopipeline
 
 
 ### Input
 
-The .mzXML files have been grouped into "blank", "QC", "sample1", "sample2" and "sample3" and put inside directories with the respective names (Fig-1a). Each of the directories contains 4 .mzXML files.
+The .mzXML files have been grouped into "blank", "QC", "sample1", "sample2" and "sample3" and put inside directories with the respective names (Fig-1a). Each of the directories contains 4 .mzXML files. While uploading the input directory, the output directory should also be selected to avoid errors.
 
 <img src="AutopipelineInpt.png" alt="Aotopipeline Input" style="width: 60%"/>
 
@@ -68,7 +68,7 @@ Fig-1e: Merged result table
 
 The Preprocessing tab works exactly the first part of the Autopipeline. It uses XCMS but not xMSannotator. 
 ### Input
-The input for Preprocessing tab is same as the Annotation tab; the raw metbolomics data (Fig-1a). It provides option to modify various parameters according to user interest (See Documentation).
+The input for Preprocessing tab is same as the Annotation tab; the raw metbolomics data (Fig-1a). It provides option to modify various parameters according to user interest (See Documentation). While uploading the input directory, the output directory should also be selected to avoid errors.
 
 
 ### Output
@@ -123,7 +123,13 @@ contains "ID", "cluster", "NodeStrength", "EigenCentrality" and "NodeDegree" for
 
 #### Visualization
 
-This tab allows the users to use the same input as that of the StatisticalAnalysis tab or log transformed intensities of the metabolites to visualize the data using plots such as Heatmap, PCA plot, Level plot and RLA plot (Fig-5).
+This tab allows the users to use the output generated from the Autopipeline as the inputs to visualize the data using plots such as Heatmap, PCA plot, Level plot and RLA plot (Fig-5). The users can also use these options independently with their data formated according to the structure mentioned below.
+
+[`Vizinpt.csv`](https://github.com/alexd106/ShIMA/blob/master/Examples/VizInpt.csv) has been used as the input file for the Heatmap and Level plot whereas the [`StatisticalAnalysInpt.csv`](https://github.com/alexd106/ShIMA/blob/master/Examples/StatisticalAnalysInpt.csv) is the input file for PCA and RLA plots.
+
+- The Heatmap and level plot takes text files which are comma/tab separated where the first column contains the metabolite IDs or names (which is considered as the row names) and the column names are the individual sample name and the records are intensities of individual metabolites. 
+
+- In case of input for the PCA and Level plots, the file contains the individual sample names as the first column considered as the row names and the sample groups in the second column. The all other column names must be metabolite iDs or names and the records are intensities of individual metabolites.
 
 <img src="heatmap.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
 

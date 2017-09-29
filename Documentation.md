@@ -4,12 +4,12 @@ runtime: shiny
 output: html_document
 ---
 
-This is an R Markdown document to provide a overview of the Metabolomics pipeline and how it works.  
+This is an R Markdown document to provide a overview of the Metabolomics pipeline and how it works. As this pipeline deals mainly with high-throughput data, it is recommended to use a high configuration system. It runs perfectly on Linux and may have a few troubleshoot for the Windows. Though the pipeline looks similar to a web-based tool but all the processing are actually done in R on the local machine. The logs, warnings and errors can be checked on the R console while ShIMA is running. ShIMA has been tested well with R version between 3.3.0 to 3.4.0. 
 
 # Introduction
 The "Shiny Interface for Metabolite Analysis" (ShIMA) is developed in Shiny graphical user interface (GUI) environment using R. The basic idea is to provide a platform where the users can easily analyse the metabolomics datasets to identify and annotate metabolites. There is also provision for a few basic downstream analyses. The pipeline runs mainly on widely used packages such as XCMS, xMSannotator and metabolomics to perform the analysis. In-house scripts were written for automating and linking the individual analysis. The users do not need to be experts in programming in R.
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/Pipeline.png" alt="Pipeline_Home" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/Pipeline.png" alt="Pipeline_Home" style="width: 60%"/>
 
 Figure 1: The Metabolomics Pipeline Home page
 
@@ -20,7 +20,7 @@ There are 2 main features of this pipeline; options to choose basic information 
 The *Autopipeline* doesn"t allow the users to change the value for the parameters and set as the default. It takes the raw metabolomics data as input and the users can select the output directory. It reads various types of raw data formats such as NetCDF, mzXML, mzData, etc.
 
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/Autopipeline.png" alt="Aotopipeline" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/Autopipeline.png" alt="Aotopipeline" style="width: 60%"/>
 
 Figure 2: The Autopipeline tab
 
@@ -29,7 +29,7 @@ Once the Go button is pressed, the process starts running. It pre-processes the 
 
 ## Preprocessing
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/Preprocessing.png" alt="Preprocessing" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/Preprocessing.png" alt="Preprocessing" style="width: 60%"/>
 
 Figure 3: The Preprocessing tab
 
@@ -39,7 +39,7 @@ This takes the raw metabolomics data formats such as mzXML, NetCDF, mzData, etc.
 
 Once the "Go" button is clicked it starts reading the individual raw data files (also reads inside sub directories automatically), stores into a variable and tags according to their respective subdirectory names which are considered as the sample classes with the help of the function [`xcmsSet`](https://www.rdocumentation.org/packages/xcms/versions/1.48.0/topics/xcmsSet) from XCMS. We use the `centWave` algorithm for the peak detection method which is usually "matched filter" by default in XCMS. The "centWave" algorithm is preferred in case of high-resolution MS data. There are a few parameters such as ppm, Peakwidth, Signal to noise ratio cutoff, prefilter mass traces, Number of slaves/core, Minimum difference in m/z and integration method, which are needed to be optimized based upon the particular experimental conditions. The users can see the default values in the Parameters collapsible panel and they can change it according to their interest.
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/PreprocessingParam.png" alt="Preprocessing Parameters" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/PreprocessingParam.png" alt="Preprocessing Parameters" style="width: 60%"/>
 
 Figure 4: The Preprocessing tab Parameters option
 
@@ -53,13 +53,13 @@ Output files are generated for the significant analyte intensities across all th
 
 ## Annotation
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/Annotation.png" alt="Annotation" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/Annotation.png" alt="Annotation" style="width: 60%"/>
 
 Figure 5: The Annotation tab
 
 The Annotation tab provides database matches against the processed metabolomics data to identify known metabolites with the help of xMSannotator package. It provides a function known as [`multilevelannotation`](https://rdrr.io/github/yufree/xMSannotator/man/multilevelannotation.html) which accepts user defined value for several parameters to search against databases efficiently. Several parameters are associated with the multilevelannotation which can be modified by the users: 
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/AnnotationParam.png" alt="Annotation Parameters" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/AnnotationParam.png" alt="Annotation Parameters" style="width: 60%"/>
 
 Figure 6: The Annotation tab Parameters option
 
@@ -94,26 +94,26 @@ The statistical analysis focuses on the significant identifications of metabolit
 The input is prepared in such a way that the metabolite intensities (mz) will be representing the columns and the corresponding groups in the rows.
 
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/StatisticalAnalysis.png" alt="StatisticalAnalysis" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/StatisticalAnalysis.png" alt="StatisticalAnalysis" style="width: 60%"/>
 
 Figure 7: The StatisticalAnalysis tab
 
 The Differential Analysis results in differential expression of the data. It provides 2 options  which are using Reference and Groups to chose the groups for comparsion of level of differential expressions. The reference can be selected and it will perform all the possible combinations of groups, keeping the chosen one as the control. The second option Groups provides all the possible combinations of the groups to choose one by one to customize the output. Except these options, there are a few other options to chose cutt-offs for the data based upon p-value, adjusted p-value and log fold change. The users can easily type in the value for these parameters and it will be suseted from the entire results and be presented.
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/DifferentialAnalysis.png" alt="DifferentialAnalysis" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/DifferentialAnalysis.png" alt="DifferentialAnalysis" style="width: 60%"/>
 
 Figure 8: The Differential Analysis panel on StatisticalAnalysis tab
 
 Similarly in case of the Network Analysis panel, the user has to mention the group name for choosing the data to be subset and used as input. Then it constructs mutual information network on the selected data. The mutual information calculated here is actually the conditional mutual information (CMI) with the help of [`minet`](https://www.rdocumentation.org/packages/minet/versions/3.30.0/topics/minet) function from the package minet which is "Mutual Information NETworks". It calculates the mutual information between all pairs of variables in the provided input and creates the adjacency matrix. Then the adjacency matrix is converted to igraph object using [`graph_from_adjacency_matrix`](https://www.rdocumentation.org/packages/igraph/versions/1.1.2/topics/graph_from_adjacency_matrix) function from igraph. Further several network properties were calculated for the entire network. The network file can be saved in .graphml format which can be used further in graph visualization tools such as Gephi. A file will be generated containing the network properties from the statistical analysis of the network.
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/NetworkAnalysis.png" alt="NetworkAnalysis" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/NetworkAnalysis.png" alt="NetworkAnalysis" style="width: 60%"/>
 
 Figure 9: The Network Analysis panel on StatisticalAnalysis tab
 
 ## Visualization
 The Visualization tab is simply for producing various graphs by using the output of the analysis. There are options to choose for plots to be output as .png files such as Heatmap, PCA, Level and RLA. 
 
-<img src="https://github.com/alexd106/ShIMA/tree/master/www/Visualization.png" alt="Visualization" style="width: 60%"/>
+<img src="https://github.com/alexd106/ShIMA/blob/master/www/Visualization.png" alt="Visualization" style="width: 60%"/>
 
 Figure 10: The Visualization panel on StatisticalAnalysis tab
 
@@ -135,7 +135,7 @@ The RLA plot produces the relative log abundance plots for both within group and
 
 ## Reports
 
-There is interesting options available to create reports in pdf/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can save the report.
+There is interesting options available to create reports in pdf/html/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can click it to generate and save the report. In case of windows system, the pdf and html format may not render properly, so it is suggested to use doc reports instead.
 
 
 # Suggestions

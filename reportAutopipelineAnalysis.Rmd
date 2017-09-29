@@ -47,32 +47,32 @@ Once the processing steps are finished, the Autopipeline goes for the annotation
 
 - The annotation against HMDB identified `r length(hmdbRes$chemical_ID)` number of metabolites among which `r length(unique(hmdbRes$chemical_ID))` are unique. 
 
-Number of metabolites with high confidence: length(unique(hmdbRes[hmdbRes$Confidence == 3,]$chemical_ID))
+Number of metabolites with high confidence: `r length(unique(hmdbRes[hmdbRes$Confidence == 3,]$chemical_ID))`
 
-Number of metabolites with medium confidence: length(unique(hmdbRes[hmdbRes$Confidence == 2,]$chemical_ID))
+Number of metabolites with medium confidence: `r length(unique(hmdbRes[hmdbRes$Confidence == 2,]$chemical_ID))`
 
-Number of metabolites with low confidence: length(unique(hmdbRes[hmdbRes$Confidence == 1,]$chemical_ID))
+Number of metabolites with low confidence: `r length(unique(hmdbRes[hmdbRes$Confidence == 1,]$chemical_ID))`
 
-Number of metabolites with no confidence: length(unique(hmdbRes[hmdbRes$Confidence == 0,]$chemical_ID))
+Number of metabolites with no confidence: `r length(unique(hmdbRes[hmdbRes$Confidence == 0,]$chemical_ID))`
 
 - The annotation against KEGG identified `r length(keggRes$chemical_ID)` number of metabolites among which `r length(unique(keggRes$chemical_ID))` are unique. 
 
-Number of metabolites with high confidence: length(unique(keggRes[keggRes$Confidence == 3,]$chemical_ID))
+Number of metabolites with high confidence: `r length(unique(keggRes[keggRes$Confidence == 3,]$chemical_ID))`
 
-Number of metabolites with medium confidence: length(unique(keggRes[keggRes$Confidence == 2,]$chemical_ID))
+Number of metabolites with medium confidence: `r length(unique(keggRes[keggRes$Confidence == 2,]$chemical_ID))`
 
-Number of metabolites with low confidence: length(unique(keggRes[keggRes$Confidence == 1,]$chemical_ID))
+Number of metabolites with low confidence: `r length(unique(keggRes[keggRes$Confidence == 1,]$chemical_ID))`
 
-Number of metabolites with no confidence: length(unique(keggRes[keggRes$Confidence == 0,]$chemical_ID))
+Number of metabolites with no confidence: `r length(unique(keggRes[keggRes$Confidence == 0,]$chemical_ID))`
 
 - The annotation against LipidMaps identified `r length(LipidMapsRes$chemical_ID)` number of metabolites among which `r length(unique(LipidMapsRes$chemical_ID))` are unique. 
 
-Number of metabolites with high confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 3,]$chemical_ID))
+Number of metabolites with high confidence: `r length(unique(LipidMapsRes[LipidMapsRes$Confidence == 3,]$chemical_ID))`
 
-Number of metabolites with medium confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 2,]$chemical_ID))
+Number of metabolites with medium confidence: `r length(unique(LipidMapsRes[LipidMapsRes$Confidence == 2,]$chemical_ID))`
 
-Number of metabolites with low confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 1,]$chemical_ID))
+Number of metabolites with low confidence: `r length(unique(LipidMapsRes[LipidMapsRes$Confidence == 1,]$chemical_ID))`
 
-Number of metabolites with no confidence: length(unique(LipidMapsRes[LipidMapsRes$Confidence == 0,]$chemical_ID))
+Number of metabolites with no confidence: `r length(unique(LipidMapsRes[LipidMapsRes$Confidence == 0,]$chemical_ID))`
 
 The results was merged into a file named "AllMergdRes.csv" which contains the annotation against 4 databases which are Metlin, HMDB, KEGG and LipidMaps.
