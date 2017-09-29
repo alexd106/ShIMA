@@ -131,20 +131,19 @@ This tab allows the users to use the output generated from the Autopipeline as t
 
 - In case of input for the PCA and Level plots, the file contains the individual sample names as the first column considered as the row names and the sample groups in the second column. The all other column names must be metabolite iDs or names and the records are intensities of individual metabolites.
 
-![Heatmap](https://github.com/alexd106/ShIMA/blob/master/www/heatmap.png?raw=true "Title")
-
+![Heatmap](https://github.com/alexd106/ShIMA/blob/master/www/heatmap.png)
 
 Fig-5a: Heatmap
 
-<img src="https://github.com/alexd106/ShIMA/blob/master/www/pca.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+![PCA plot](https://github.com/alexd106/ShIMA/blob/master/www/pca.png)
 
 Fig-5b: PCA plot
 
-<img src="https://github.com/alexd106/ShIMA/blob/master/www/levelplot.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+![Level plot](https://github.com/alexd106/ShIMA/blob/master/www/levelplot.png)
 
 Fig-5c: Level plot
 
-<img src="https://github.com/alexd106/ShIMA/blob/master/www/rla.png" alt="StatisticalAnalysis Input" style="width: 60%"/>
+![RLA plot](https://github.com/alexd106/ShIMA/blob/master/www/rla.png)
 
 Fig-5d: RLA plot
 
