@@ -38,7 +38,7 @@ install.packages("RANN",repos="http://cran.r-project.org")
 
 For the installation of the package xMSannotator, you can go through the instructions below or you 
 may want to have a look at 
-<https://sourceforge.net/projects/xmsannotator/files/Installation_instructions_xMSannotator.txt/download>. 
+[](https://sourceforge.net/projects/xmsannotator/files/Installation_instructions_xMSannotator.txt/download>). 
 We have also kept a zip version of xMSannotator at <https://github.com/alexd106/ShIMA/tree/master/Install> 
 installation which is highly recommended for the version control in ShIMA.
 The example dataset can be found at <https://github.com/alexd106/ShIMA/tree/master/Examples/Examples.zip>.
@@ -59,11 +59,11 @@ On Linux:
 
 Linux also accepts the tar.gz installation file. It can be done by simply going to the directory 
 which contains the installation file and then running "R CMD INSTALL xMSannotator_*.tar.gz" to install.
-
+```
 
 You may now run the shiny app with just one command in R:
 
-```
+
 shiny::runGitHub("ShIMA", "alexd106")
 ```
 
