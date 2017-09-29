@@ -135,7 +135,7 @@ The RLA plot produces the relative log abundance plots for both within group and
 
 ## Reports
 
-There is interesting options available to create reports in pdf/html/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can click it to generate and save the report. In case of windows system, the pdf and html format may not render properly, so it is suggested to use doc reports instead.
+There is interesting options available to create reports in pdf/html/doc format for the analysis from Autopipeline, Preprocessing, Annotation and StatisticalAnalysis tabs. These reports summarize the meta data information for the input and output as well as inference into the analysis using various visualizations. Once the analysis is run, the "Generate Reprt" button will be activated and user can click it to generate and save the report. In case of windows system, the pdf and html format may not render properly, so it is suggested to use doc reports instead. The Generate report button will only be activated once the jab submitted is finished. 
 
 
 # Suggestions
